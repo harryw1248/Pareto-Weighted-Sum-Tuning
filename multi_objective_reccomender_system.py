@@ -5,6 +5,8 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 
+trials_data = []
+
 def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
     np.random.seed(101) 
     x = np.linspace(func1_lower, func1_upper, num_points) #weighted_value
@@ -24,7 +26,7 @@ def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, f
     plt.xlabel('weighted_value') 
     plt.ylabel('max_worst_case') 
     plt.scatter([x[0] for x in objective_value_pairs], [y[1] for y in objective_value_pairs], color="blue") 
-    plt.show()
+    #plt.show()
 
     return objective_value_pairs
 
@@ -39,19 +41,23 @@ def tuples_to_list(pairs):
     
     return new_list
 
-
 def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
+
+    trial_data = {'alpha_true': alpha, 'tolerance': tolerance, 'func1_lower': func1_lower, 'func1_upper': func1_upper, 
+                 'func2_upper': func2_upper, 'func2_lower': func2_lower, 'num_points': num_points, 'noise': noise, 
+                 'weight1': 0, 'weight2': 0, 'alpha_learned': 0}
 
     print("Trial " + str(id))
     objective_value_pairs = generate_data(id, func1_lower, func1_upper, func2_upper, func2_lower, num_points, noise)
     num_data_points = len(objective_value_pairs)
     half_point = int(num_data_points / 2)
+    margin_from_half = int(num_data_points / 20)
     objective_value_lists = tuples_to_list(objective_value_pairs)
     user_1 = Sample_User(alpha, tolerance)
 
     sample_pairs = []
     sample_pairs_list = []
-    for i in range(half_point-5,half_point+5):
+    for i in range(half_point-margin_from_half,half_point+margin_from_half):
         sample_pairs.append(objective_value_pairs[i])
         sample_pairs_list.append(objective_value_lists[i])
 
@@ -70,15 +76,24 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     coef = reg.coef_
     print("Coefficients:")
     print(coef)
+    trial_data['weight1'] = coef[0] 
+    trial_data['weight2'] = coef[1] 
     sum_coef = sum(coef)
+
     print("Normalized Coefficients:")
     print([x/sum_coef for x in coef])
-    #prediction = reg.predict(np.array([[200, 0]]))
+
+    trial_data['alpha_learned'] = (coef[0] / sum_coef) 
+    trial_data['alpha_error'] = ( abs((coef[0] / sum_coef) - alpha) / alpha ) 
+
     print("\n")
-    return 
+    trials_data.append(trial_data)
+    return trial_data
     
 
 def main():
+
+    
     trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
     trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
     trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
@@ -89,18 +104,35 @@ def main():
     trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
     trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
 
-    trial(id='1.0', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
-    trial(id='1.1', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
-    trial(id='1.2', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
-    trial(id='1.3', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
-
-    trial(id='2.0', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
-    trial(id='2.1', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
-    trial(id='2.2', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
-    trial(id='2.3', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
-    
+    trial(id='1.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
+    trial(id='1.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
+    trial(id='1.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
+    trial(id='1.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
     
 
+    trial(id='2.0 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
+    trial(id='2.1 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
+    trial(id='2.2 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
+    trial(id='2.3 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
+
+    trial(id='2.0 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=10)
+    trial(id='2.1 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=15)
+    trial(id='2.2 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=20)
+    trial(id='2.3 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=25)
+    
+
+    trial(id='3.0 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=10)
+    trial(id='3.1 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=15)
+    trial(id='3.2 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=20)
+    trial(id='3.3 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=25)
+    
+    trial(id='4.0 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=10)
+    trial(id='4.1 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=15)
+    trial(id='4.2 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=20)
+    trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
+    
+    df = pd.DataFrame(trials_data)
+    df.to_excel("experiment_results.xlsx")
 
 
 main()
