@@ -48,9 +48,10 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
     print("Normalized Coefficients:")
     print([x/sum_coef for x in coef])
+    alpha_learned = (coef[0] / sum_coef) 
 
-    trial_data['alpha_learned'] = (coef[0] / sum_coef) 
-    trial_data['alpha_error'] = ( abs((coef[0] / sum_coef) - alpha) / alpha ) 
+    trial_data['alpha_learned'] = alpha_learned
+    trial_data['alpha_error'] = ( abs(alpha_learned - alpha) / alpha ) 
 
     print("\n")
     trials_data.append(trial_data)
@@ -58,7 +59,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     for example in objective_value_pairs:
         user_1.user_decision(example)
 
-    user_rank_indices = user_1.get_user_objective_values()
+    user_objective_values = user_1.get_user_objective_values()
 
     x_values = [x[0] for x in objective_value_lists]
     y_values = [y[1] for y in objective_value_lists]
@@ -66,7 +67,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
     for i in range(len(x_values)):
         key = (x_values[i], y_values[i])
-        value = user_rank_indices[key]
+        value = user_objective_values[key]
         z_values.append(value)
     
     fig = plt.figure()
@@ -82,7 +83,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     x = np.linspace(func1_lower, func1_upper, num_data_points)
     y = np.linspace(func2_upper, func2_lower, num_data_points)
     X, Y = np.meshgrid(x, y)
-    Z = f((coef[0]/sum_coef), X, Y)
+    Z = f(alpha_learned, X, Y)
 
     ax.contour3D(X, Y, Z, 50, cmap='binary')
     plt.show()

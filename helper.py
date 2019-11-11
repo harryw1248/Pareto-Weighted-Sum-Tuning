@@ -2,11 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-def compute_kendall_tau(ranking1_table, ranking2_table):
-    ranking1_list = []
-    ranking2_list = []
 
-    return         
+def compute_kendall_tau(ranking1_table, ranking2_table):
+    ranking1_list = [x[0] for x in sorted(ranking1_table.items(), key = lambda kv:(kv[1], kv[0]))]
+    ranking2_list = [x[0] for x in sorted(ranking2_table.items(), key = lambda kv:(kv[1], kv[0]))]
+    tau, p_value = stats.kendalltau(ranking1_list, ranking2_list)
+
+    return tau         
 
 def get_rankings(objective_values, rank_indices):
     objective_values_list = []
