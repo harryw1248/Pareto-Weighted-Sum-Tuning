@@ -1,5 +1,6 @@
 
 import numpy as np
+import helper as hp
 
 """
 Class that simulates a sample user
@@ -23,25 +24,8 @@ class Sample_User:
         return self.user_objective_values
     
     def get_user_rank_indices(self):
+        hp.get_rankings(self.user_objective_values, self.user_rank_indices)
         return self.user_rank_indices
-
-    def get_rankings(self):
-        objective_values = []
-        for item in self.user_objective_values:
-            input = item
-            output = self.user_objective_values[item]
-            objective_values.append((input, output))
-        
-        objective_values.sort(key = lambda x: x[1])  
-        num_items = len(objective_values)
-
-        for pair in self.user_objective_values:
-            rank_index = 0.0
-            for item in objective_values:
-                if pair != item[0]:
-                    rank_index += 1
-                else:
-                    self.user_rank_indices[pair] = rank_index
 
     #Note: how should we model fluctuation? uniform? normal?
     def user_decision(self, objective_value_pair_1):

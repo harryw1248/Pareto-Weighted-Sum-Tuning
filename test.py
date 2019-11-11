@@ -139,7 +139,7 @@ def trial_1():
     print(intercept)
     plt = plot_decision_points(user_decisions, objective_value_pairs, slope, intercept)
 
-    '''
+    
     x = np.linspace(100, 150, 50) #weighted_value
     # get the separating hyperplane
     w = clf.coef_[0]
@@ -152,7 +152,7 @@ def trial_1():
     plt.plot(x, a*x + b, linestyle='solid')
 
     plt.show()
-    '''
+    
 
 def main():
     #objective_value_pairs = generate_data()

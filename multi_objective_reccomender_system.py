@@ -1,46 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
-import helper
+import helper as hp 
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 
 trials_data = []
-
-def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
-    np.random.seed(101) 
-    x = np.linspace(func1_lower, func1_upper, num_points) #weighted_value
-    y = np.linspace(func2_upper, func2_lower, num_points)  #worst_case
-  
-    x += np.random.uniform(-1*(noise), noise, num_points) 
-    y += np.random.uniform(-1*(noise), noise, num_points) 
-
-    objective_value_pairs = [] 
-    counter = 0
-    for item in x:
-        pair = (x[counter],y[counter])
-        objective_value_pairs.append(pair)
-        counter += 1
-    
-    plt.title("Objective Value Pairs " + str(id))
-    plt.xlabel('weighted_value') 
-    plt.ylabel('max_worst_case') 
-    plt.scatter([x[0] for x in objective_value_pairs], [y[1] for y in objective_value_pairs], color="blue") 
-    #plt.show()
-
-    return objective_value_pairs
-
-"""
-Takes in list of tuples and converts it to list of 2 element lists
-"""
-def tuples_to_list(pairs):
-    new_list = []
-    for item in pairs:
-        sub_list = [item[0], item[1]]
-        new_list.append(sub_list)
-    
-    return new_list
 
 def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
 
@@ -49,11 +15,11 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
                  'weight1': 0, 'weight2': 0, 'alpha_learned': 0}
 
     print("Trial " + str(id))
-    objective_value_pairs = generate_data(id, func1_lower, func1_upper, func2_upper, func2_lower, num_points, noise)
+    objective_value_pairs = hp.generate_data(id, func1_lower, func1_upper, func2_upper, func2_lower, num_points, noise)
     num_data_points = len(objective_value_pairs)
     half_point = int(num_data_points / 2)
     margin_from_half = int(num_data_points / 20)
-    objective_value_lists = tuples_to_list(objective_value_pairs)
+    objective_value_lists = hp.tuples_to_list(objective_value_pairs)
     user_1 = Sample_User(alpha, tolerance)
 
     sample_pairs = []
@@ -65,7 +31,6 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     for example in sample_pairs:
         user_1.user_decision(example)
     
-    user_1.get_rankings()
     user_rank_indices = user_1.get_user_rank_indices()
     
     user_rank_indices_list = []
@@ -93,8 +58,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     for example in objective_value_pairs:
         user_1.user_decision(example)
 
-    user_1.get_rankings()
-    user_rank_indices = user_1.get_user_rank_indices()
+    user_rank_indices = user_1.get_user_objective_values()
 
     x_values = [x[0] for x in objective_value_lists]
     y_values = [y[1] for y in objective_value_lists]
@@ -111,7 +75,6 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     ax.set_xlabel('Weighted Value')
     ax.set_ylabel('Max Worst Case')
     ax.set_zlabel('Multi-Objective Value')
-    #plt.show()
 
     def f(alpha, x, y):
         return alpha*x + (1-alpha)*y
@@ -121,12 +84,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     X, Y = np.meshgrid(x, y)
     Z = f((coef[0]/sum_coef), X, Y)
 
-    #fig = plt.figure()
-    #ax = plt.axes(projection='3d')
     ax.contour3D(X, Y, Z, 50, cmap='binary')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z');
     plt.show()
     
     return trial_data
@@ -135,10 +93,10 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 def main():
 
     
-    trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
+    #trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
     #trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
     #trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
-    #trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
+    trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
 
     '''
     trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
