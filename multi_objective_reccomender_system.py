@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 import helper
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -88,6 +89,46 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
     print("\n")
     trials_data.append(trial_data)
+
+    for example in objective_value_pairs:
+        user_1.user_decision(example)
+
+    user_1.get_rankings()
+    user_rank_indices = user_1.get_user_rank_indices()
+
+    x_values = [x[0] for x in objective_value_lists]
+    y_values = [y[1] for y in objective_value_lists]
+    z_values = []
+
+    for i in range(len(x_values)):
+        key = (x_values[i], y_values[i])
+        value = user_rank_indices[key]
+        z_values.append(value)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter3D(x_values, y_values, z_values, cmap='Greens')
+    ax.set_xlabel('Weighted Value')
+    ax.set_ylabel('Max Worst Case')
+    ax.set_zlabel('Multi-Objective Value')
+    #plt.show()
+
+    def f(alpha, x, y):
+        return alpha*x + (1-alpha)*y
+    
+    x = np.linspace(func1_lower, func1_upper, num_data_points)
+    y = np.linspace(func2_upper, func2_lower, num_data_points)
+    X, Y = np.meshgrid(x, y)
+    Z = f((coef[0]/sum_coef), X, Y)
+
+    #fig = plt.figure()
+    #ax = plt.axes(projection='3d')
+    ax.contour3D(X, Y, Z, 50, cmap='binary')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z');
+    plt.show()
+    
     return trial_data
     
 
@@ -95,10 +136,11 @@ def main():
 
     
     trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
-    trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
-    trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
-    trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
+    #trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
+    #trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
+    #trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
 
+    '''
     trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
     trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
     trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
@@ -130,7 +172,8 @@ def main():
     trial(id='4.1 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=15)
     trial(id='4.2 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=20)
     trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
-    
+    '''
+
     df = pd.DataFrame(trials_data)
     df.to_excel("experiment_results.xlsx")
 
