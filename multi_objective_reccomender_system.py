@@ -5,28 +5,53 @@ import helper as hp
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
+import gui
 
 trials_data = []
+
+def users_kendall_tau(user_1, user_2, objective_value_pairs):
+
+    for example in objective_value_pairs:
+        user_1.user_decision(example)
+    
+    for example in objective_value_pairs:
+        user_2.user_decision(example)
+    
+    user_1_rank_indices = user_1.get_user_rank_indices()
+    user_2_rank_indices = user_1.get_user_rank_indices()
+    tau = hp.compute_kendall_tau(user_1_rank_indices, user_2_rank_indices)
+
+    return tau
+
+def user_feedback():
+    objective_value_pairs = hp.generate_data()
+
+    #get 5 percent of samples from data
+    data_subset = hp.get_data_subset(objective_value_pairs)
+    objective_value_lists = data_subset[0]
+    sample_pairs = data_subset[1]
+    sample_pairs_list = data_subset[2]
+    gui.generate_menu(sample_pairs)
+
+    return
 
 def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
 
     trial_data = {'alpha_true': alpha, 'tolerance': tolerance, 'func1_lower': func1_lower, 'func1_upper': func1_upper, 
                  'func2_upper': func2_upper, 'func2_lower': func2_lower, 'num_points': num_points, 'noise': noise, 
-                 'weight1': 0, 'weight2': 0, 'alpha_learned': 0}
+                 'weight1': 0, 'weight2': 0, 'alpha_learned': 0, 'kendall_tau': 0}
 
     print("Trial " + str(id))
     objective_value_pairs = hp.generate_data(id, func1_lower, func1_upper, func2_upper, func2_lower, num_points, noise)
-    num_data_points = len(objective_value_pairs)
-    half_point = int(num_data_points / 2)
-    margin_from_half = int(num_data_points / 20)
-    objective_value_lists = hp.tuples_to_list(objective_value_pairs)
-    user_1 = Sample_User(alpha, tolerance)
 
-    sample_pairs = []
-    sample_pairs_list = []
-    for i in range(half_point-margin_from_half,half_point+margin_from_half):
-        sample_pairs.append(objective_value_pairs[i])
-        sample_pairs_list.append(objective_value_lists[i])
+    #get 5 percent of samples from data
+    data_subset = hp.get_data_subset(objective_value_pairs)
+    objective_value_lists = data_subset[0]
+    sample_pairs = data_subset[1]
+    sample_pairs_list = data_subset[2]
+
+    #have virtual sample user make decisions
+    user_1 = Sample_User(alpha, tolerance)
 
     for example in sample_pairs:
         user_1.user_decision(example)
@@ -37,6 +62,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     for pair in sample_pairs:
         user_rank_indices_list.append(user_rank_indices[pair])
     
+    #use ML to analyze results
     reg = LinearRegression().fit(sample_pairs, user_rank_indices_list)
     score = reg.score(sample_pairs, user_rank_indices_list)
     coef = reg.coef_
@@ -56,38 +82,22 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     print("\n")
     trials_data.append(trial_data)
 
+    #graph results
     for example in objective_value_pairs:
         user_1.user_decision(example)
 
     user_objective_values = user_1.get_user_objective_values()
 
-    x_values = [x[0] for x in objective_value_lists]
-    y_values = [y[1] for y in objective_value_lists]
-    z_values = []
-
-    for i in range(len(x_values)):
-        key = (x_values[i], y_values[i])
-        value = user_objective_values[key]
-        z_values.append(value)
+    hp.graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=True)
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter3D(x_values, y_values, z_values, cmap='Greens')
-    ax.set_xlabel('Weighted Value')
-    ax.set_ylabel('Max Worst Case')
-    ax.set_zlabel('Multi-Objective Value')
+    #user comparison
 
-    def f(alpha, x, y):
-        return alpha*x + (1-alpha)*y
-    
-    x = np.linspace(func1_lower, func1_upper, num_data_points)
-    y = np.linspace(func2_upper, func2_lower, num_data_points)
-    X, Y = np.meshgrid(x, y)
-    Z = f(alpha_learned, X, Y)
+    learned_user = Sample_User(alpha_learned, 0)
+    #tau = users_kendall_tau(user_1, learned_user, objective_value_pairs)
+    #print("Kendall-Tau")
+    #print(tau)
+    #trial_data['kendall_tau'] = tau 
 
-    ax.contour3D(X, Y, Z, 50, cmap='binary')
-    plt.show()
-    
     return trial_data
     
 
@@ -97,14 +107,15 @@ def main():
     #trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
     #trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
     #trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
-    trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
+    #trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
+
+    
+    #trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
+    #trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
+    #trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
+    #trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
 
     '''
-    trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
-    trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
-    trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
-    trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
-
     trial(id='1.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
     trial(id='1.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
     trial(id='1.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
@@ -133,8 +144,9 @@ def main():
     trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
     '''
 
-    df = pd.DataFrame(trials_data)
-    df.to_excel("experiment_results.xlsx")
+    #df = pd.DataFrame(trials_data)
+    #df.to_excel("experiment_results.xlsx")
+    user_feedback()
 
 
 main()

@@ -1,15 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+#import rpy2
 
-
-def compute_kendall_tau(ranking1_table, ranking2_table):
-    ranking1_list = [x[0] for x in sorted(ranking1_table.items(), key = lambda kv:(kv[1], kv[0]))]
-    ranking2_list = [x[0] for x in sorted(ranking2_table.items(), key = lambda kv:(kv[1], kv[0]))]
-    tau, p_value = stats.kendalltau(ranking1_list, ranking2_list)
+def compute_kendall_tau(ranking_1_table, ranking_2_table):
+    ranking_1_list = [x[0] for x in sorted(ranking_1_table.items(), key = lambda kv:(kv[1], kv[0]))]
+    ranking_2_list = [x[0] for x in sorted(ranking_2_table.items(), key = lambda kv:(kv[1], kv[0]))]
+    tau = 0 #rpy2.cor(ranking_1_list, ranking_2_list, method="kendall")
 
     return tau         
 
+#note: for ranking index, a higher index suggests a better ranking
 def get_rankings(objective_values, rank_indices):
     objective_values_list = []
     for item in objective_values:
@@ -60,3 +61,49 @@ def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, f
     #plt.show()
 
     return objective_value_pairs
+
+def get_data_subset(objective_value_pairs):
+    sample_pairs = []
+    sample_pairs_list = []
+    num_data_points = len(objective_value_pairs)
+    half_point = int(num_data_points / 2)
+    margin_from_half = int(num_data_points / 20)
+    objective_value_lists = tuples_to_list(objective_value_pairs)
+
+    for i in range(half_point-margin_from_half,half_point+margin_from_half+1):
+        sample_pairs.append(objective_value_pairs[i])
+        sample_pairs_list.append(objective_value_lists[i])
+
+    return [objective_value_lists, sample_pairs, sample_pairs_list]
+
+def graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=False):
+    x_values = [x[0] for x in objective_value_lists]
+    y_values = [y[1] for y in objective_value_lists]
+    z_values = []
+
+    for i in range(len(x_values)):
+        key = (x_values[i], y_values[i])
+        value = user_objective_values[key]
+        z_values.append(value)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter3D(x_values, y_values, z_values, cmap='Greens')
+    ax.set_xlabel('Weighted Value')
+    ax.set_ylabel('Max Worst Case')
+    ax.set_zlabel('Multi-Objective Value')
+
+    def f(alpha, x, y):
+        return alpha*x + (1-alpha)*y
+    
+    x = np.linspace(func1_lower, func1_upper, num_points)
+    y = np.linspace(func2_upper, func2_lower, num_points)
+    X, Y = np.meshgrid(x, y)
+    Z = f(alpha_learned, X, Y)
+
+    ax.contour3D(X, Y, Z, 50, cmap='binary')
+
+    if show == True:
+        plt.show()
+
+    return
