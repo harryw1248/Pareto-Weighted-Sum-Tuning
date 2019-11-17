@@ -23,14 +23,13 @@ def users_kendall_tau(user_1, user_2, objective_value_pairs):
 
     return tau
 
-def user_feedback():
+def user_feedback(sample_pairs):
     objective_value_pairs = hp.generate_data()
 
     #get 5 percent of samples from data
-    data_subset = hp.get_data_subset(objective_value_pairs)
-    objective_value_lists = data_subset[0]
-    sample_pairs = data_subset[1]
-    sample_pairs_list = data_subset[2]
+    #data_subset = hp.get_data_subset(objective_value_pairs)
+    #objective_value_lists = data_subset[0]
+    #sample_pairs_list = data_subset[2]
     user_rank_indices = {}
 
     #gui.generate_menu(sample_pairs)
@@ -60,7 +59,39 @@ def user_feedback():
     print("Normalized Coefficients:")
     print([x/sum_coef for x in coef])
 
-    return
+    return coef[0]/sum_coef
+
+def reccomend_pairs():
+    objective_value_pairs = hp.generate_data()
+    #get 5 percent of samples from data
+    data_subset = hp.get_data_subset(objective_value_pairs)
+    objective_value_lists = data_subset[0]
+    sample_pairs = data_subset[1]
+    sample_pairs_list = data_subset[2]
+    user_rank_indices = {}
+
+    generate = '1'
+    while generate == '1' and len(objective_value_pairs) != 0:
+        alpha_learned = user_feedback(sample_pairs)
+        objective_value_pairs = [x for x in objective_value_pairs if x not in sample_pairs]
+        data_subset = hp.get_data_subset(objective_value_pairs)
+        objective_value_lists = data_subset[0]
+        sample_pairs = data_subset[1]
+        sample_pairs_list = data_subset[2]
+
+        user_1 = Sample_User(alpha_learned, 0)
+        for example in sample_pairs:
+            user_1.user_decision(example)
+
+        ordered_list = user_1.get_user_ordered_list()
+        print("Reccomended ordering of newly generated pairs")
+        for i in range(len(ordered_list)):
+            print(str(ordered_list[i]) + " " + str(float(i)))
+        print("Continue generating ranked pairs? Enter 1 for yes and 0 for no")
+        generate = input()
+
+    return 
+
 
 def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
 
@@ -109,7 +140,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
     user_objective_values = user_1.get_user_objective_values()
 
-    hp.graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=True)
+    #hp.graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=False)
     
     #user comparison
 
@@ -124,19 +155,17 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
 def main():
 
-    
-    #trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
-    #trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
-    #trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
-    #trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
+    '''    
+    trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
+    trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
+    trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
+    trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
 
-    
-    #trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
-    #trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
-    #trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
-    #trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
+    trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
+    trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
+    trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
+    trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
 
-    '''
     trial(id='1.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
     trial(id='1.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
     trial(id='1.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
@@ -164,10 +193,9 @@ def main():
     trial(id='4.2 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=20)
     trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
     '''
-
     df = pd.DataFrame(trials_data)
     df.to_excel("experiment_results.xlsx")
-    user_feedback()
+    reccomend_pairs()
 
 
 main()

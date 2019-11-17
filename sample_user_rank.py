@@ -15,6 +15,7 @@ class Sample_User:
 
     user_objective_values = {}
     user_rank_indices = {} #for ranks 0...n, n designates the best rank, 
+    ordered_list = []
 
     def __init__(self, alpha, tolerance):
         self.alpha = alpha
@@ -24,8 +25,14 @@ class Sample_User:
         return self.user_objective_values
     
     def get_user_rank_indices(self):
-        hp.get_rankings(self.user_objective_values, self.user_rank_indices)
+        results = hp.get_rankings(self.user_objective_values, self.user_rank_indices)
+        self.user_rank_indices = results[0]
         return self.user_rank_indices
+
+    def get_user_ordered_list(self):
+        results = hp.get_rankings(self.user_objective_values, self.user_rank_indices)
+        self.ordered_list = results[1]
+        return self.ordered_list
 
     #Note: how should we model fluctuation? uniform? normal?
     def user_decision(self, objective_value_pair_1):
