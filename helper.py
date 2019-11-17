@@ -24,12 +24,18 @@ def learn_parameters(user_rank_indices, sample_pairs):
     coef = reg.coef_
     return coef
 
-def compute_kendall_tau(ranking_1_table, ranking_2_table):
-    vector_one = [x[0] for x in sorted(ranking_1_table.items(), key = lambda kv:(kv[1], kv[0]))]
-    vector_two = [x[0] for x in sorted(ranking_2_table.items(), key = lambda kv:(kv[1], kv[0]))]
-    #tau = 0 #rpy2.cor(ranking_1_list, ranking_2_list, method="kendall")
+def compute_kendall_tau(ranking_1_table, ranking_2_table, list=False):
 
-    kendall_tau_data = list()
+    vector_one = ranking_1_table
+    vector_two = ranking_2_table
+
+    if list == False:
+        vector_one = [x[0] for x in sorted(ranking_1_table.items(), key = lambda kv:(kv[1], kv[0]))]
+        vector_two = [x[0] for x in sorted(ranking_2_table.items(), key = lambda kv:(kv[1], kv[0]))]
+    #tau = 0 #rpy2.cor(ranking_1_list, ranking_2_list, method="kendall")
+    
+    vector_one = [str(x) for x in vector_one]
+    vector_two = [str(x) for x in vector_two]
 
     # Generate all possible pairs of two ranks for vector_one and append them to a list
     pairs_vec_one = []

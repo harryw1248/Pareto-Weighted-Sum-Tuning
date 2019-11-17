@@ -37,7 +37,7 @@ class Sample_User:
 
     def get_user_ordered_list(self):
         results = hp.get_rankings(self.user_objective_values, self.user_rank_indices)
-        self.ordered_list = results[1]
+        self.ordered_list = [x[0] for x in results[1]]
         return self.ordered_list
 
     #Note: how should we model fluctuation? uniform? normal?
