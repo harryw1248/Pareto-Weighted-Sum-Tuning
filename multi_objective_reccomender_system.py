@@ -31,7 +31,34 @@ def user_feedback():
     objective_value_lists = data_subset[0]
     sample_pairs = data_subset[1]
     sample_pairs_list = data_subset[2]
-    gui.generate_menu(sample_pairs)
+    user_rank_indices = {}
+
+    #gui.generate_menu(sample_pairs)
+    #print("gui done")
+
+    print("Pairs to rank")
+    for item in sample_pairs:
+        print(item)
+
+    print("Give each pair a unique score from 0 to " + str(len(sample_pairs)-1))
+    print("0 represents least desirable pair")
+    print(str(len(sample_pairs)-1) + " represents most desirable pair")
+    for item in sample_pairs:
+        print(item)
+        score = float(input())
+        user_rank_indices[item] = score
+    
+    print("Scores given by you")
+    for item in user_rank_indices:
+        print(str(item) + " " + str(user_rank_indices[item]))
+
+    coef = hp.learn_parameters(user_rank_indices, sample_pairs)
+    print("Coefficients:")
+    print(coef)
+    sum_coef = sum(coef)
+
+    print("Normalized Coefficients:")
+    print([x/sum_coef for x in coef])
 
     return
 
@@ -58,14 +85,8 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
     
     user_rank_indices = user_1.get_user_rank_indices()
     
-    user_rank_indices_list = []
-    for pair in sample_pairs:
-        user_rank_indices_list.append(user_rank_indices[pair])
-    
     #use ML to analyze results
-    reg = LinearRegression().fit(sample_pairs, user_rank_indices_list)
-    score = reg.score(sample_pairs, user_rank_indices_list)
-    coef = reg.coef_
+    coef = hp.learn_parameters(user_rank_indices, sample_pairs)
     print("Coefficients:")
     print(coef)
     trial_data['weight1'] = coef[0] 
@@ -144,8 +165,8 @@ def main():
     trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
     '''
 
-    #df = pd.DataFrame(trials_data)
-    #df.to_excel("experiment_results.xlsx")
+    df = pd.DataFrame(trials_data)
+    df.to_excel("experiment_results.xlsx")
     user_feedback()
 
 

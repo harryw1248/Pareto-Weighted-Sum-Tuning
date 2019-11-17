@@ -35,13 +35,21 @@ def generate_menu(pairs):
         popupMenu.grid(row = row_counter, column =1)
         row_counter += 1
 
-    # on change dropdown value
-    def change_dropdown(tk):
-        print(tk.get())
+        # on change dropdown value
+    def change_dropdown(*args):
+        for i in range(num_pairs):
+            print(tkvars[i].get())
 
     # link function to change dropdown
     for i in range(num_pairs):
-        tkvars[i].trace('w', change_dropdown(tkvars[i]))
+        tkvars[i].trace('w', change_dropdown)
 
-    root.protocol("WM_DELETE_WINDOW")
+    
+    #tkvars[0].trace('w', change_dropdown)
+    #tkvars[1].trace('w', change_dropdown)
+    #tkvars[2].trace('w', change_dropdown)
+    #tkvars[3].trace('w', change_dropdown)
+    #tkvars[4].trace('w', change_dropdown)
+    
+    print("reached before mainloop")
     root.mainloop()

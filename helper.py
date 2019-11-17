@@ -1,7 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+
 #import rpy2
+
+def learn_parameters(user_rank_indices, sample_pairs):
+    user_rank_indices_list = []
+    for pair in sample_pairs:
+        user_rank_indices_list.append(user_rank_indices[pair])
+    
+    scaler = StandardScaler()
+    scaler.fit(sample_pairs)
+    for pair in sample_pairs:
+        scaler.transform(pair)
+
+    reg = LinearRegression().fit(sample_pairs, user_rank_indices_list)
+    score = reg.score(sample_pairs, user_rank_indices_list)
+    coef = reg.coef_
+    return coef
 
 def compute_kendall_tau(ranking_1_table, ranking_2_table):
     ranking_1_list = [x[0] for x in sorted(ranking_1_table.items(), key = lambda kv:(kv[1], kv[0]))]
@@ -11,6 +29,7 @@ def compute_kendall_tau(ranking_1_table, ranking_2_table):
     return tau         
 
 #note: for ranking index, a higher index suggests a better ranking
+#uses multi-objective value to rank pairs
 def get_rankings(objective_values, rank_indices):
     objective_values_list = []
     for item in objective_values:
@@ -19,7 +38,7 @@ def get_rankings(objective_values, rank_indices):
         objective_values_list.append((input, output))
         
     objective_values_list.sort(key = lambda x: x[1])  
-    num_items = len(objective_values)
+    #num_items = len(objective_values)
 
     for pair in objective_values:
         rank_index = 0.0
