@@ -26,15 +26,7 @@ def users_kendall_tau(user_1, user_2, objective_value_pairs):
 
 def user_feedback(sample_pairs):
     objective_value_pairs = hp.generate_data()
-
-    #get 5 percent of samples from data
-    #data_subset = hp.get_data_subset(objective_value_pairs)
-    #objective_value_lists = data_subset[0]
-    #sample_pairs_list = data_subset[2]
     user_rank_indices = {}
-
-    #gui.generate_menu(sample_pairs)
-    #print("gui done")
 
     print("Pairs to rank")
     for item in sample_pairs:
@@ -61,23 +53,20 @@ def user_feedback(sample_pairs):
 def reccomend_pairs():
     alphas_learned = []
     objective_value_pairs = hp.generate_data()
+
     #get 5 percent of samples from data
     data_subset = hp.get_data_subset(objective_value_pairs)
-    objective_value_lists = data_subset[0]
     sample_pairs = data_subset[1]
-    sample_pairs_list = data_subset[2]
-    user_rank_indices = {}
 
     generate = '1'
     while generate == '1' and len(objective_value_pairs) != 0:
         alpha_learned = user_feedback(sample_pairs)
         objective_value_pairs = [x for x in objective_value_pairs if x not in sample_pairs]
         data_subset = hp.get_data_subset(objective_value_pairs)
-        objective_value_lists = data_subset[0]
         sample_pairs = data_subset[1]
-        sample_pairs_list = data_subset[2]
         alphas_learned.append(alpha_learned)
         mean_alpha_learned = mean(alphas_learned)
+
         print("Current alpha value: " + str(mean_alpha_learned))
 
         user_1 = Sample_User(mean_alpha_learned, 0)

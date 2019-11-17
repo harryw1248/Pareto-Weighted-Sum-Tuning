@@ -22,9 +22,9 @@ class Sample_User:
         self.tolerance = tolerance
     
     def __del__(self): 
-        self.user_objective_values = {}
-        self.user_rank_indices = {} #for ranks 0...n, n designates the best rank, 
-        self.ordered_list = []
+        self.user_objective_values.clear()
+        self.user_rank_indices.clear() #for ranks 0...n, n designates the best rank, 
+        del self.ordered_list[:]
         #print('Destructor called, Object deleted.')
     
     def get_user_objective_values(self):
