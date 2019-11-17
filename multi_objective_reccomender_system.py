@@ -5,6 +5,7 @@ import helper as hp
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
+from statistics import mean 
 import gui
 
 trials_data = []
@@ -52,16 +53,13 @@ def user_feedback(sample_pairs):
         print(str(item) + " " + str(user_rank_indices[item]))
 
     coef = hp.learn_parameters(user_rank_indices, sample_pairs)
-    print("Coefficients:")
-    print(coef)
+    
     sum_coef = sum(coef)
-
-    print("Normalized Coefficients:")
-    print([x/sum_coef for x in coef])
 
     return coef[0]/sum_coef
 
 def reccomend_pairs():
+    alphas_learned = []
     objective_value_pairs = hp.generate_data()
     #get 5 percent of samples from data
     data_subset = hp.get_data_subset(objective_value_pairs)
@@ -78,8 +76,11 @@ def reccomend_pairs():
         objective_value_lists = data_subset[0]
         sample_pairs = data_subset[1]
         sample_pairs_list = data_subset[2]
+        alphas_learned.append(alpha_learned)
+        mean_alpha_learned = mean(alphas_learned)
+        print("Current alpha value: " + str(mean_alpha_learned))
 
-        user_1 = Sample_User(alpha_learned, 0)
+        user_1 = Sample_User(mean_alpha_learned, 0)
         for example in sample_pairs:
             user_1.user_decision(example)
 
