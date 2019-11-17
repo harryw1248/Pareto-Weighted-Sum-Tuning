@@ -21,6 +21,12 @@ class Sample_User:
         self.alpha = alpha
         self.tolerance = tolerance
     
+    def __del__(self): 
+        self.user_objective_values = {}
+        self.user_rank_indices = {} #for ranks 0...n, n designates the best rank, 
+        self.ordered_list = []
+        #print('Destructor called, Object deleted.')
+    
     def get_user_objective_values(self):
         return self.user_objective_values
     

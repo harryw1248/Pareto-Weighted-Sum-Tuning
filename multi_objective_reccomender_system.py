@@ -89,6 +89,7 @@ def reccomend_pairs():
         for i in range(len(ordered_list)):
             print(str(ordered_list[i]) + " " + str(float(i)))
         print("Continue generating ranked pairs? Enter 1 for yes and 0 for no")
+        del user_1
         generate = input()
 
     return 
