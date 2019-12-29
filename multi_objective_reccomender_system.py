@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 from statistics import mean 
-import gui
+import interactive 
 
 trials_data = []
 
@@ -19,29 +19,28 @@ def users_kendall_tau(user_1, user_2, objective_value_pairs):
         user_2.user_decision(example)
     
     user_1_rank_indices = user_1.get_user_rank_indices()
-    user_2_rank_indices = user_1.get_user_rank_indices()
+    user_2_rank_indices = user_2.get_user_rank_indices()
     tau = hp.compute_kendall_tau(user_1_rank_indices, user_2_rank_indices)
 
     return tau
 
-def user_feedback(sample_pairs):
+def user_feedback(sample_pairs, user_virtual):
     user_rank_indices = {}
 
-    print("Pairs to rank")
-    for item in sample_pairs:
-        print(item)
+    ###
+    for example in sample_pairs:
+        user_virtual.user_decision(example)
 
-    print("Give each pair a unique score from 0 to " + str(len(sample_pairs)-1))
-    print("0 represents least desirable pair")
-    print(str(len(sample_pairs)-1) + " represents most desirable pair\n")
-    for item in sample_pairs:
-        print(item)
-        score = float(input())
-        user_rank_indices[item] = score
-    
-    print("Scores given by you")
-    for item in user_rank_indices:
-        print(str(item) + " " + str(user_rank_indices[item]))
+    ordered_list_generated = [x for x in user_virtual.get_user_ordered_list()]
+    print("Virtual User Decisions")
+    for i in range(len(ordered_list_generated)):
+        print(str(ordered_list_generated[i]) + " " + str(float(i)))
+        user_rank_indices[(ordered_list_generated[i])] = float(i)
+    ###
+
+    #for item in sample_pairs:
+    #    score = float(input()) #change 
+    #    user_rank_indices[item] = score
 
     coef = hp.learn_parameters(user_rank_indices, sample_pairs)
     ordered_list = [x[0] for x in hp.get_rankings(user_rank_indices, user_rank_indices)[1]]
@@ -51,7 +50,10 @@ def user_feedback(sample_pairs):
 
     return [alpha_learned, ordered_list]
 
-def reccomend_pairs():
+def reccomend_pairs(alpha=0.3, tolerance=0.05):
+    user_virtual = Sample_User(alpha, tolerance)
+
+
     alphas_learned = []
     objective_value_pairs = hp.generate_data()
 
@@ -65,7 +67,7 @@ def reccomend_pairs():
 
     generate = '1'
     while generate == '1' and len(objective_value_pairs) != 0:
-        user_feedback_results = user_feedback(sample_pairs)
+        user_feedback_results = user_feedback(sample_pairs, user_virtual)
         alpha_learned = user_feedback_results[0]
         ordered_list_user = user_feedback_results[1]
 
@@ -86,14 +88,17 @@ def reccomend_pairs():
 
         user_1 = Sample_User(mean_alpha_learned, 0)
         for example in sample_pairs:
-            user_1.user_decision(example)
+            user_1.user_decision(example) #need ordered list and ranks after this?
 
         ordered_list_generated = [x for x in user_1.get_user_ordered_list()]
+
         print("Reccomended ordering of newly generated pairs")
         for i in range(len(ordered_list_generated)):
             print(str(ordered_list_generated[i]) + " " + str(float(i)))
+
         print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
         del user_1
+        user_virtual.clear_user_history()
         generate = input()
 
     return 
@@ -200,10 +205,10 @@ def main():
     trial(id='4.2 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=20)
     trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
     '''
+    
+    #df = pd.DataFrame(trials_data)
+    #df.to_excel("experiment_results.xlsx")
     reccomend_pairs()
-    df = pd.DataFrame(trials_data)
-    df.to_excel("experiment_results.xlsx")
-    #reccomend_pairs()
 
 
 main()

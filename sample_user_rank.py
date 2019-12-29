@@ -20,12 +20,20 @@ class Sample_User:
     def __init__(self, alpha, tolerance):
         self.alpha = alpha
         self.tolerance = tolerance
+        self.user_objective_values = {}
+        self.user_rank_indices = {} 
+        self.ordered_list = []
     
     def __del__(self): 
         self.user_objective_values.clear()
-        self.user_rank_indices.clear() #for ranks 0...n, n designates the best rank, 
+        self.user_rank_indices.clear()
         del self.ordered_list[:]
         #print('Destructor called, Object deleted.')
+    
+    def clear_user_history(self):
+        self.user_objective_values.clear()
+        self.user_rank_indices.clear() 
+        del self.ordered_list[:]
     
     def get_user_objective_values(self):
         return self.user_objective_values
