@@ -116,8 +116,8 @@ def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, f
     plt.title("Objective Value Pairs " + str(id))
     plt.xlabel('weighted_value') 
     plt.ylabel('max_worst_case') 
-    #plt.scatter([x[0] for x in objective_value_pairs], [y[1] for y in objective_value_pairs], color="blue") 
-    #plt.show()
+    plt.scatter([x[0] for x in objective_value_pairs], [y[1] for y in objective_value_pairs], color="blue") 
+    plt.show()
 
     return objective_value_pairs
 

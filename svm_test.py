@@ -107,7 +107,8 @@ def extract_objective_value_pairs(df):
 def trial_1():
     #Note: normalize the datapoints themselves?
     objective_value_pairs = generate_data()
-    user_1 = Sample_User(0.2, 0.07) # not robust as these values change
+    #user_1 = Sample_User(0.2, 0.07) # not robust as these values change
+    user_1 = Sample_User(0.5, 0.07) # not robust as these values change
 
     for i in range(25):
         user_1.user_decision(objective_value_pairs[i],objective_value_pairs[49-i])
