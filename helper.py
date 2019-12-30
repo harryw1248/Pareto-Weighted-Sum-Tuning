@@ -19,6 +19,7 @@ def learn_parameters(user_rank_indices, sample_pairs):
     #for pair in sample_pairs_list:
     #    scaler.transform(pair)
 
+    #for linear regression, try looking into non-negative weights as an optimization constraint later
     reg = LinearRegression().fit(sample_pairs_list, user_rank_indices_list)
     score = reg.score(sample_pairs, user_rank_indices_list)
     coef = reg.coef_

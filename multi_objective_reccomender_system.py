@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
@@ -7,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 from statistics import mean 
 import interactive 
+
 
 trials_data = []
 
@@ -24,35 +26,59 @@ def users_kendall_tau(user_1, user_2, objective_value_pairs):
 
     return tau
 
-def user_feedback(sample_pairs, user_virtual):
+def user_feedback(sample_pairs, user_virtual, iteration_number):
     user_rank_indices = {}
 
-    ###
+    
     for example in sample_pairs:
         user_virtual.user_decision(example)
 
     ordered_list_generated = [x for x in user_virtual.get_user_ordered_list()]
+
     print("Virtual User Decisions")
+    f = open("user_queries_train.dat", "a")
+    f.write("# query " + str(iteration_number) + "\n")
     for i in range(len(ordered_list_generated)):
         print(str(ordered_list_generated[i]) + " " + str(float(i)))
+        f.write(str(i) + " qid:" + str(iteration_number) + " ")
+        for j in range(len(ordered_list_generated[i])):
+            f.write(str(j+1) + ":" + str(ordered_list_generated[i][j]) + " ")
+        f.write("\n")
         user_rank_indices[(ordered_list_generated[i])] = float(i)
-    ###
-
+    
+    f.close()
     #for item in sample_pairs:
     #    score = float(input()) #change 
     #    user_rank_indices[item] = score
 
+    os.system("./svm_rank_learn -c 3 user_queries_train.dat model ")
     coef = hp.learn_parameters(user_rank_indices, sample_pairs)
+
+    f_read = open("model", "r")
+    last_line = f_read.readlines()[-1]
+    arr = last_line.split(' #')[0].split()
+    arr = arr[1:]
+    new_arr = []
+    ''' Extract each feature from the feature vector '''
+    for el in arr:
+        new_arr.append(float(el.split(':')[1]))
+    f_read.close()
+
     ordered_list = [x[0] for x in hp.get_rankings(user_rank_indices, user_rank_indices)[1]]
 
-    sum_coef = sum(coef)
-    alpha_learned = coef[0]/sum_coef
+    #sum_coef = sum(coef)
+    #alpha_learned = coef[0]/sum_coef
+
+    sum_coef = sum(new_arr)
+    alpha_learned = new_arr[0]/sum_coef
 
     return [alpha_learned, ordered_list]
 
 def reccomend_pairs(alpha=0.3, tolerance=0.05):
-    user_virtual = Sample_User(alpha, tolerance)
+    f = open("user_queries_train.dat", "w")
+    f.close()
 
+    user_virtual = Sample_User(alpha, tolerance)
 
     alphas_learned = []
     objective_value_pairs = hp.generate_data()
@@ -64,11 +90,15 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
     ordered_list_user = []
     ordered_list_generated = []
     kendall_tau_scores = []
+    iteration_number = 0
 
     generate = '1'
     while generate == '1' and len(objective_value_pairs) != 0:
-        user_feedback_results = user_feedback(sample_pairs, user_virtual)
+        print("iteration number: " + str(iteration_number))
+        iteration_number += 1
+        user_feedback_results = user_feedback(sample_pairs, user_virtual, iteration_number)
         alpha_learned = user_feedback_results[0]
+        print("alpha_learned " + str(alpha_learned))
         ordered_list_user = user_feedback_results[1]
 
         if(len(ordered_list_user) != 0 and len(ordered_list_generated) != 0):
