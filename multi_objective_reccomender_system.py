@@ -81,7 +81,7 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
     user_virtual = Sample_User(alpha, tolerance)
 
     alphas_learned = []
-    objective_value_pairs = hp.generate_data()
+    objective_value_pairs = hp.generate_data(func1_lower=75, func1_upper=175, func2_upper=-100, func2_lower=-200, num_points=200, noise=50)
 
     #get 5 percent of samples from data
     data_subset = hp.get_data_subset(objective_value_pairs)
