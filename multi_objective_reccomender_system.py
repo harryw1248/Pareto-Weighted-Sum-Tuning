@@ -81,7 +81,8 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
     user_virtual = Sample_User(alpha, tolerance)
 
     alphas_learned = []
-    objective_value_pairs = hp.generate_data(func1_lower=75, func1_upper=175, func2_upper=-100, func2_lower=-200, num_points=200, noise=50)
+    mean_alphas = []
+    objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=-50, func2_lower=200, num_points=1000, noise=20)
 
     #get 5 percent of samples from data
     data_subset = hp.get_data_subset(objective_value_pairs)
@@ -91,9 +92,9 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
     ordered_list_generated = []
     kendall_tau_scores = []
     iteration_number = 0
-
-    generate = '1'
-    while generate == '1' and len(objective_value_pairs) != 0:
+    iteration_limit = 20
+    generate = '1' #used for interative feedback
+    while iteration_number < iteration_limit and len(objective_value_pairs) != 0:
         print("iteration number: " + str(iteration_number))
         iteration_number += 1
         user_feedback_results = user_feedback(sample_pairs, user_virtual, iteration_number)
@@ -102,7 +103,7 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
         ordered_list_user = user_feedback_results[1]
 
         if(len(ordered_list_user) != 0 and len(ordered_list_generated) != 0):
-            tau = hp.compute_kendall_tau(ordered_list_user, ordered_list_generated, list=True)
+            tau = 0.5#hp.compute_kendall_tau(ordered_list_user, ordered_list_generated, list=True)
             kendall_tau_scores.append(tau)
             mean_kendall_tau = mean(kendall_tau_scores)
             print("Iteration Kendall Tau: " + str(tau))
@@ -114,6 +115,7 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
         alphas_learned.append(alpha_learned)
         mean_alpha_learned = mean(alphas_learned)
 
+        mean_alphas.append(mean_alpha_learned)
         print("Current alpha value: " + str(mean_alpha_learned) + "\n")
 
         user_1 = Sample_User(mean_alpha_learned, 0)
@@ -126,10 +128,17 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
         for i in range(len(ordered_list_generated)):
             print(str(ordered_list_generated[i]) + " " + str(float(i)))
 
-        print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
+        #print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
         del user_1
         user_virtual.clear_user_history()
-        generate = input()
+        #generate = input()
+
+    plt.title("Alpha Progress ")
+    plt.xlabel("Iteration Number") 
+    plt.ylabel("Alpha")
+    plt.axhline(y=alpha, color='r', linestyle='-')
+    plt.plot([i for i in range(iteration_limit)], mean_alphas)
+    plt.show()
 
     return 
 
@@ -181,15 +190,7 @@ def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150
 
     user_objective_values = user_1.get_user_objective_values()
 
-    hp.graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=True)
-    
-    #user comparison
-
-    learned_user = Sample_User(alpha_learned, 0)
-    #tau = users_kendall_tau(user_1, learned_user, objective_value_pairs)
-    #print("Kendall-Tau")
-    #print(tau)
-    #trial_data['kendall_tau'] = tau 
+    hp.graph_hyperplane(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=True)
 
     return trial_data
     

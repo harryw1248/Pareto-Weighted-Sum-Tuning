@@ -136,7 +136,7 @@ def get_data_subset(objective_value_pairs):
 
     return [objective_value_lists, sample_pairs, sample_pairs_list]
 
-def graph_trial_ML_results(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=False):
+def graph_hyperplane(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=False):
     x_values = [x[0] for x in objective_value_lists]
     y_values = [y[1] for y in objective_value_lists]
     z_values = []
@@ -166,4 +166,7 @@ def graph_trial_ML_results(user_objective_values, objective_value_lists, func1_l
     if show == True:
         plt.show()
 
+    return
+
+def graph_alphas():
     return
