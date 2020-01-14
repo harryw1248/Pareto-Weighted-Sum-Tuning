@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -99,42 +100,105 @@ def tuples_to_list(pairs):
     
     return new_list
 
-def generate_data(id="Test",func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
-    np.random.seed(101) 
-    x = np.linspace(func1_lower, func1_upper, num_points) #weighted_value
-    y = np.linspace(func2_upper, func2_lower, num_points)  #worst_case
-  
-    x += np.random.uniform(-1*(noise), noise, num_points) 
-    y += np.random.uniform(-1*(noise), noise, num_points) 
+def average_vectors(vectors):
+    result = []
+    for i in range(len(vectors[0])):
+        component_sum = 0
+        for vector in vectors:
+            component_sum += vector[i]
+        result.append((component_sum/len(vectors)))
 
-    objective_value_pairs = [] 
-    counter = 0
-    for item in x:
-        pair = (x[counter],y[counter])
-        objective_value_pairs.append(pair)
-        counter += 1
+    return result
+
+def dominates(pair1, pair2):
+    if pair1[0] > pair2[0] and pair1[1] > pair2[1]:
+        return True
+    return False
+
+def get_non_dominated(objective_value_pairs):
+    non_dominated_pairs = []
+    for i in range(len(objective_value_pairs)):
+        dominated = False
+        for j in range(len(objective_value_pairs)):
+            if dominates(objective_value_pairs[j], objective_value_pairs[i]):
+                dominated = True
+        if dominated == False:
+            non_dominated_pairs.append(objective_value_pairs[i])
+    non_dominated_pairs = sorted(non_dominated_pairs, key=lambda x: x[0])
+    print("Number of Non-Dominated Pairs: " + str(len(non_dominated_pairs)))
+    return non_dominated_pairs
+
+'''
+range_vector describes range of values for objective functions
+format [f1_extreme_1, f1_extreme_2, f2_extreme_1, f2_extreme_2, etc...]
+Note: ordering of extreme does matter
+'''
+def generate_data(id="Test",range_vector = [100, 150, 75, -50], num_points=50, noise=10):
+    np.random.seed(101) 
     
+    objective_values = []
+    for i in range(int(len(range_vector)/2)):
+        x = np.linspace(range_vector[i*2], range_vector[i*2+1], num_points)
+        x += np.random.uniform(-1*(noise), noise, num_points) 
+        objective_values.append(x)
+        
+    objective_value_tuples = [] 
+    
+    for i in range(num_points):
+        tuple_list = []
+        for objective_value_array in objective_values:
+            tuple_list.append(objective_value_array[i])
+        objective_value_tuples.append(tuple(tuple_list))
+    
+    #objective_value_pairs = get_non_dominated(objective_value_pairs)
     plt.title("Objective Value Pairs " + str(id))
     plt.xlabel('weighted_value') 
     plt.ylabel('max_worst_case') 
-    plt.scatter([x[0] for x in objective_value_pairs], [y[1] for y in objective_value_pairs], color="blue") 
+    plt.scatter([x[0] for x in objective_value_tuples], [y[1] for y in objective_value_tuples], color="blue") 
     plt.show()
 
-    return objective_value_pairs
+    return objective_value_tuples
 
-def get_data_subset(objective_value_pairs):
-    sample_pairs = []
-    sample_pairs_list = []
-    num_data_points = len(objective_value_pairs)
+def get_data_subset(objective_value_tuples):
+    sample_tuples = []
+    sample_tuples_list = []
+    num_data_points = len(objective_value_tuples)
     half_point = int(num_data_points / 2)
-    margin_from_half = int(num_data_points / 20)
-    objective_value_lists = tuples_to_list(objective_value_pairs)
+    margin_from_half = 5#2#int(num_data_points / 50)
+    objective_value_lists = tuples_to_list(objective_value_tuples)
 
+    
     for i in range(half_point-margin_from_half,half_point+margin_from_half+1):
-        sample_pairs.append(objective_value_pairs[i])
-        sample_pairs_list.append(objective_value_lists[i])
+        sample_tuples.append(objective_value_tuples[i])
+        sample_tuples_list.append(objective_value_lists[i])
+    
+    
 
-    return [objective_value_lists, sample_pairs, sample_pairs_list]
+    '''
+    #idea in progress: ensure that no pair is dominated
+    for i in range(5):
+        sample_pairs.append(random.choice(objective_value_pairs))
+    '''
+    
+    '''
+    while len(sample_pairs) != 5:
+        sample_pair = random.choice(objective_value_pairs)
+        dominated = True
+        while dominated == True:
+            sample_pair = random.choice(objective_value_pairs)
+            for pair in sample_pairs:
+                if dominates(sample_pair, pair) == True:
+                    sample_pairs.remove(pair)
+                if dominates(sample_pair, pair) == False:
+                    dominated == False
+                if dominates(pair, sample_pair) == True:
+                    dominated == True
+            if dominated == False:
+                sample_pairs.append(sample_pair)
+    '''
+    #sample_pairs_list = tuples_to_list(sample_pairs)
+    
+    return [objective_value_lists, sample_tuples, sample_tuples_list]
 
 def graph_hyperplane(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=False):
     x_values = [x[0] for x in objective_value_lists]

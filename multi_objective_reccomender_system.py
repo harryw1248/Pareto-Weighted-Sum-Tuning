@@ -52,7 +52,7 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
     #    user_rank_indices[item] = score
 
     os.system("./svm_rank_learn -c 3 user_queries_train.dat model ")
-    coef = hp.learn_parameters(user_rank_indices, sample_pairs)
+    #coef = hp.learn_parameters(user_rank_indices, sample_pairs)
 
     f_read = open("model", "r")
     last_line = f_read.readlines()[-1]
@@ -70,36 +70,49 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
     #alpha_learned = coef[0]/sum_coef
 
     sum_coef = sum(new_arr)
-    alpha_learned = new_arr[0]/sum_coef
+    alpha_vector_learned = [x/sum_coef for x in new_arr]
+    alpha_vector_learned.pop()
 
-    return [alpha_learned, ordered_list]
+    return [alpha_vector_learned, ordered_list]
 
-def reccomend_pairs(alpha=0.3, tolerance=0.05):
+def reccomend_pairs(alpha_vector=[0.3], tolerance_vector=[0.05]):
     f = open("user_queries_train.dat", "w")
     f.close()
 
-    user_virtual = Sample_User(alpha, tolerance)
+    user_virtual = Sample_User(alpha_vector, tolerance_vector)
 
-    alphas_learned = []
-    mean_alphas = []
-    objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=-50, func2_lower=200, num_points=1000, noise=20)
+    alpha_vectors_learned = []
+    mean_alpha_vectors = [] #used to track progress of reccomendation system
+    #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=300, func2_upper=150, func2_lower=-50, num_points=500, noise=10)
+    #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=150, func2_lower=-50, num_points=500, noise=20)
 
-    #get 5 percent of samples from data
-    data_subset = hp.get_data_subset(objective_value_pairs)
-    sample_pairs = data_subset[1]
+    #objective_value_pairs = hp.generate_data(func1_lower=100, func1_upper=150, func2_upper=75, func2_lower=50, num_points=50, noise=5) #best performance so far < 0.01 error (150 points)
+    #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=200, func2_lower=-50, num_points=100, noise=20)
+    #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=200, func2_lower=-50, num_points=1000, noise=20)
+    
+    #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=200, func2_lower=-50, num_points=100, noise=20)
+    
+    objective_value_tuples = hp.generate_data(num_points=150, noise=10)
+
+    #get 10 samples from data
+    data_subset = hp.get_data_subset(objective_value_tuples)
+    sample_tuples = data_subset[1]
 
     ordered_list_user = []
     ordered_list_generated = []
     kendall_tau_scores = []
     iteration_number = 0
-    iteration_limit = 20
+    iteration_limit = 7
     generate = '1' #used for interative feedback
-    while iteration_number < iteration_limit and len(objective_value_pairs) != 0:
+    while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
         print("iteration number: " + str(iteration_number))
         iteration_number += 1
-        user_feedback_results = user_feedback(sample_pairs, user_virtual, iteration_number)
-        alpha_learned = user_feedback_results[0]
-        print("alpha_learned " + str(alpha_learned))
+        user_feedback_results = user_feedback(sample_tuples, user_virtual, iteration_number)
+        alpha_vector_learned = user_feedback_results[0]
+
+        for i in range(len(alpha_vector_learned)):
+            print("Iteration alpha " + str(i) + " learned: " + str(alpha_vector_learned[i]))
+
         ordered_list_user = user_feedback_results[1]
 
         if(len(ordered_list_user) != 0 and len(ordered_list_generated) != 0):
@@ -109,17 +122,18 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
             print("Iteration Kendall Tau: " + str(tau))
             print("Mean Kendall Tau: " + str(mean_kendall_tau))
 
-        objective_value_pairs = [x for x in objective_value_pairs if x not in sample_pairs]
+        objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
         data_subset = hp.get_data_subset(objective_value_pairs)
-        sample_pairs = data_subset[1]
-        alphas_learned.append(alpha_learned)
-        mean_alpha_learned = mean(alphas_learned)
+        sample_tuples = data_subset[1]
+        alpha_vectors_learned.append(alpha_vector_learned)
+        mean_alpha_vector_learned = hp.average_vectors(alpha_vectors_learned)
 
-        mean_alphas.append(mean_alpha_learned)
-        print("Current alpha value: " + str(mean_alpha_learned) + "\n")
+        mean_alpha_vectors.append(mean_alpha_vector_learned)
+        for i in range(len(mean_alpha_vector_learned)):
+            print("Current mean alpha " + str(i) + " learned: " + str(mean_alpha_vector_learned[i]))
 
-        user_1 = Sample_User(mean_alpha_learned, 0)
-        for example in sample_pairs:
+        user_1 = Sample_User(mean_alpha_vector_learned, [0 for i in range(len(mean_alpha_vector_learned))])
+        for example in sample_tuples:
             user_1.user_decision(example) #need ordered list and ranks after this?
 
         ordered_list_generated = [x for x in user_1.get_user_ordered_list()]
@@ -133,112 +147,33 @@ def reccomend_pairs(alpha=0.3, tolerance=0.05):
         user_virtual.clear_user_history()
         #generate = input()
 
-    plt.title("Alpha Progress ")
-    plt.xlabel("Iteration Number") 
-    plt.ylabel("Alpha")
-    plt.axhline(y=alpha, color='r', linestyle='-')
-    plt.plot([i for i in range(iteration_limit)], mean_alphas)
-    plt.show()
+    for i in range(len(mean_alpha_vectors[0])):
+        y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
+        title = "Alpha " + str(i) + " Progress"
+        plt.title(title)
+        plt.xlabel("Iteration Number") 
+        plt.ylabel("Alpha")
+        plt.axhline(y=alpha_vector[i], color='r', linestyle='-')
+        plt.plot([i for i in range(iteration_limit)], y_quantities_1)
+        plt.show()
+
+        
+        title = "Alpha " + str(i) + " Error Progress"
+        y_quantities_2 = [(abs(x-alpha_vector[i])/alpha_vector[i])*100 for x in y_quantities_1]
+        plt.title(title)
+        plt.xlabel("Iteration Number") 
+        plt.ylabel("Alpha Error Percentage")
+        plt.plot([i for i in range(iteration_limit)], y_quantities_2)
+        plt.show()
+        
+
 
     return 
 
-
-def trial(id='Test', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10):
-
-    trial_data = {'alpha_true': alpha, 'tolerance': tolerance, 'func1_lower': func1_lower, 'func1_upper': func1_upper, 
-                 'func2_upper': func2_upper, 'func2_lower': func2_lower, 'num_points': num_points, 'noise': noise, 
-                 'weight1': 0, 'weight2': 0, 'alpha_learned': 0, 'kendall_tau': 0}
-
-    print("Trial " + str(id))
-    objective_value_pairs = hp.generate_data(id, func1_lower, func1_upper, func2_upper, func2_lower, num_points, noise)
-
-    #get 5 percent of samples from data
-    data_subset = hp.get_data_subset(objective_value_pairs)
-    objective_value_lists = data_subset[0]
-    sample_pairs = data_subset[1]
-    sample_pairs_list = data_subset[2]
-
-    #have virtual sample user make decisions
-    user_1 = Sample_User(alpha, tolerance)
-
-    for example in sample_pairs:
-        user_1.user_decision(example)
-    
-    user_rank_indices = user_1.get_user_rank_indices()
-    
-    #use ML to analyze results
-    coef = hp.learn_parameters(user_rank_indices, sample_pairs)
-    print("Coefficients:")
-    print(coef)
-    trial_data['weight1'] = coef[0] 
-    trial_data['weight2'] = coef[1] 
-    sum_coef = sum(coef)
-
-    print("Normalized Coefficients:")
-    print([x/sum_coef for x in coef])
-    alpha_learned = (coef[0] / sum_coef) 
-
-    trial_data['alpha_learned'] = alpha_learned
-    trial_data['alpha_error'] = ( abs(alpha_learned - alpha) / alpha ) 
-
-    print("\n")
-    trials_data.append(trial_data)
-
-    #graph results
-    for example in objective_value_pairs:
-        user_1.user_decision(example)
-
-    user_objective_values = user_1.get_user_objective_values()
-
-    hp.graph_hyperplane(user_objective_values, objective_value_lists, func1_lower, func1_upper, func2_upper, func2_lower, num_points, alpha_learned, show=True)
-
-    return trial_data
     
 
 def main():
 
-        
-    #trial(id='0.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=10)
-    #trial(id='0.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=15)
-    #trial(id='0.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=20)
-    #trial(id='0.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=50, noise=25)
-
-    '''
-    trial(id='0.0 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=10)
-    trial(id='0.1 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=15)
-    trial(id='0.2 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=20)
-    trial(id='0.3 100 points', alpha=0.3, tolerance=0.05, func1_lower=100, func1_upper=150, func2_upper=100, func2_lower=50, num_points=100, noise=25)
-
-    trial(id='1.0 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
-    trial(id='1.1 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
-    trial(id='1.2 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
-    trial(id='1.3 50 points', alpha=0.3, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
-    
-
-    trial(id='2.0 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=10)
-    trial(id='2.1 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=15)
-    trial(id='2.2 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=20)
-    trial(id='2.3 50 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=50, noise=25)
-
-    trial(id='2.0 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=10)
-    trial(id='2.1 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=15)
-    trial(id='2.2 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=20)
-    trial(id='2.3 100 points', alpha=0.5, tolerance=0.05, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=25)
-    
-
-    trial(id='3.0 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=10)
-    trial(id='3.1 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=15)
-    trial(id='3.2 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=20)
-    trial(id='3.3 100 points', alpha=0.7, tolerance=0.07, func1_lower=75, func1_upper=175, func2_upper=125, func2_lower=25, num_points=100, noise=25)
-    
-    trial(id='4.0 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=10)
-    trial(id='4.1 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=15)
-    trial(id='4.2 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=20)
-    trial(id='4.3 100 points', alpha=0.2, tolerance=0.03, func1_lower=5000, func1_upper=10000, func2_upper=2000, func2_lower=-1000, num_points=100, noise=25)
-    '''
-    
-    #df = pd.DataFrame(trials_data)
-    #df.to_excel("experiment_results.xlsx")
     reccomend_pairs()
 
 
