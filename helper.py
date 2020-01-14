@@ -133,7 +133,7 @@ range_vector describes range of values for objective functions
 format [f1_extreme_1, f1_extreme_2, f2_extreme_1, f2_extreme_2, etc...]
 Note: ordering of extreme does matter
 '''
-def generate_data(id="Test",range_vector = [100, 150, 75, -50], num_points=50, noise=10):
+def generate_data(id="Test",range_vector = [100, 150, 75, -50, 75, -50], num_points=50, noise=10):
     np.random.seed(101) 
     
     objective_values = []

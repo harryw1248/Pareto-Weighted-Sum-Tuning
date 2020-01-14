@@ -75,7 +75,7 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 
     return [alpha_vector_learned, ordered_list]
 
-def reccomend_pairs(alpha_vector=[0.3], tolerance_vector=[0.05]):
+def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
     f = open("user_queries_train.dat", "w")
     f.close()
 
