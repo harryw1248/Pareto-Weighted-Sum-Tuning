@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 from statistics import mean 
-import interactive 
+import interactive as it
 
 
 trials_data = []
@@ -47,12 +47,8 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
         user_rank_indices[(ordered_list_generated[i])] = float(i)
     
     f.close()
-    #for item in sample_pairs:
-    #    score = float(input()) #change 
-    #    user_rank_indices[item] = score
 
-    os.system("./svm_rank_learn -c 3 user_queries_train.dat model ")
-    #coef = hp.learn_parameters(user_rank_indices, sample_pairs)
+    os.system("./svm_rank_learn -c 3 user_queries_train.dat model > /dev/null 2>&1")
 
     f_read = open("model", "r")
     last_line = f_read.readlines()[-1]
@@ -65,9 +61,6 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
     f_read.close()
 
     ordered_list = [x[0] for x in hp.get_rankings(user_rank_indices, user_rank_indices)[1]]
-
-    #sum_coef = sum(coef)
-    #alpha_learned = coef[0]/sum_coef
 
     sum_coef = sum(new_arr)
     alpha_vector_learned = [x/sum_coef for x in new_arr]
@@ -92,7 +85,8 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
     
     #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=200, func2_lower=-50, num_points=100, noise=20)
     
-    objective_value_tuples = hp.generate_data(num_points=150, noise=10)
+    objective_value_tuples = hp.generate_data(range_vector = [100, 150, 75, -50, 75, -50], num_points=150, noise=10)
+    #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 80, -50, 80, -20], num_points=150, noise=10)
 
     #get 10 samples from data
     data_subset = hp.get_data_subset(objective_value_tuples)
@@ -119,8 +113,8 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
             tau = 0.5#hp.compute_kendall_tau(ordered_list_user, ordered_list_generated, list=True)
             kendall_tau_scores.append(tau)
             mean_kendall_tau = mean(kendall_tau_scores)
-            print("Iteration Kendall Tau: " + str(tau))
-            print("Mean Kendall Tau: " + str(mean_kendall_tau))
+            #print("Iteration Kendall Tau: " + str(tau))
+            #print("Mean Kendall Tau: " + str(mean_kendall_tau))
 
         objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
         data_subset = hp.get_data_subset(objective_value_pairs)
@@ -141,6 +135,7 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
         print("Reccomended ordering of newly generated pairs")
         for i in range(len(ordered_list_generated)):
             print(str(ordered_list_generated[i]) + " " + str(float(i)))
+        print("\n")
 
         #print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
         del user_1
@@ -175,6 +170,7 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
 def main():
 
     reccomend_pairs()
+    #it.reccomend_pairs()
 
 
 main()
