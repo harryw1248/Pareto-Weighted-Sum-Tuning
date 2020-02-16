@@ -1,3 +1,4 @@
+import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -68,7 +69,7 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 
     return [alpha_vector_learned, ordered_list]
 
-def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
+def reccomend_pairs(alpha_vector=[0.3], tolerance_vector=[0.01]):
     f = open("user_queries_train.dat", "w")
     f.close()
 
@@ -85,8 +86,10 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
     
     #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=200, func2_lower=-50, num_points=100, noise=20)
     
-    objective_value_tuples = hp.generate_data(range_vector = [100, 150, 75, -50, 75, -50], num_points=150, noise=10)
+    #objective_value_tuples = hp.generate_data(range_vector = [100, 150, 75, -50, 75, -50], num_points=150, noise=10)
     #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 80, -50, 80, -20], num_points=150, noise=10)
+    objective_value_tuples = hp.generate_data(range_vector = [100, 150, 75, -50], num_points=500, noise=20)
+    objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20) #figures 1-4 with 11 and 7 points
 
     #get 10 samples from data
     data_subset = hp.get_data_subset(objective_value_tuples)
@@ -96,7 +99,7 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
     ordered_list_generated = []
     kendall_tau_scores = []
     iteration_number = 0
-    iteration_limit = 7
+    iteration_limit = 10
     generate = '1' #used for interative feedback
     while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
         print("iteration number: " + str(iteration_number))
@@ -148,8 +151,9 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
         plt.title(title)
         plt.xlabel("Iteration Number") 
         plt.ylabel("Alpha")
-        plt.axhline(y=alpha_vector[i], color='r', linestyle='-')
-        plt.plot([i for i in range(iteration_limit)], y_quantities_1)
+        true_alpha = plt.axhline(y=alpha_vector[i], color='r', linestyle='-', label="True Alpha Value")
+        alpha_learned = plt.plot([i for i in range(iteration_limit)], y_quantities_1, label="Alpha Learned")
+        plt.legend()
         plt.show()
 
         
@@ -169,8 +173,11 @@ def reccomend_pairs(alpha_vector=[0.2, 0.5], tolerance_vector=[0.05, 0.05]):
 
 def main():
 
-    reccomend_pairs()
-    #it.reccomend_pairs()
+    #reccomend_pairs()
+    if len(sys.argv) == 2 and sys.argv[1] == "it":
+        it.reccomend_pairs()
+    else:
+        reccomend_pairs()
 
 
 main()

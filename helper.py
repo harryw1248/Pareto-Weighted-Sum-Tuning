@@ -164,7 +164,7 @@ def get_data_subset(objective_value_tuples):
     sample_tuples_list = []
     num_data_points = len(objective_value_tuples)
     half_point = int(num_data_points / 2)
-    margin_from_half = 5#2#int(num_data_points / 50)
+    margin_from_half = 4#2#int(num_data_points / 50)
     objective_value_lists = tuples_to_list(objective_value_tuples)
 
     
