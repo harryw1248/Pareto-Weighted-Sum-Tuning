@@ -159,12 +159,14 @@ def generate_data(id="Test",range_vector = [100, 150, 75, -50, 75, -50], num_poi
 
     return objective_value_tuples
 
-def get_data_subset(objective_value_tuples):
+'''
+number of data-points sampled at each iteration equals 2*margin_from_half + 1
+'''
+def get_data_subset(objective_value_tuples, margin_from_half):
     sample_tuples = []
     sample_tuples_list = []
     num_data_points = len(objective_value_tuples)
     half_point = int(num_data_points / 2)
-    margin_from_half = 4#2#int(num_data_points / 50)
     objective_value_lists = tuples_to_list(objective_value_tuples)
 
     
