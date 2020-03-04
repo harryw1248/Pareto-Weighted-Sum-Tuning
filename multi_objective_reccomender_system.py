@@ -36,11 +36,11 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 
     ordered_list_generated = [x for x in user_virtual.get_user_ordered_list()]
 
-    print("Virtual User Decisions")
+    #print("Virtual User Decisions")
     f = open("user_queries_train.dat", "a")
     f.write("# query " + str(iteration_number) + "\n")
     for i in range(len(ordered_list_generated)):
-        print(str(ordered_list_generated[i]) + " " + str(float(i)))
+    #    print(str(ordered_list_generated[i]) + " " + str(float(i)))
         f.write(str(i) + " qid:" + str(iteration_number) + " ")
         for j in range(len(ordered_list_generated[i])):
             f.write(str(j+1) + ":" + str(ordered_list_generated[i][j]) + " ")
@@ -72,11 +72,13 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half, random_sampling, iteration_limit):
 
     trial_data = {'num_points_each_iteration': margin_from_half*2+1, 'random_sampling': random_sampling, 
-                  'relative_alpha_error_after_10_iterations': 0, 
-                  'relative_alpha_error_after_15_iterations': 0,
-                  'relative_alpha_error_after_20_iterations': 0,
-                  'relative_alpha_error_after_25_iterations': 0,
-                  'relative_alpha_error_after_30_iterations': 0}
+                  'relative_alpha_error_after_iteration_1': 1,
+                  'relative_alpha_error_after_iteration_5': 1,
+                  'relative_alpha_error_after_iteration_10': 1, 
+                  'relative_alpha_error_after_iteration_15': 1,
+                  'relative_alpha_error_after_iteration_20': 1,
+                  'relative_alpha_error_after_iteration_25': 1,
+                  'relative_alpha_error_after_iteration_30': 1}
 
     f = open("user_queries_train.dat", "w")
     f.close()
@@ -133,12 +135,14 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         sample_tuples = data_subset[1]
         alpha_vectors_learned.append(alpha_vector_learned)
         mean_alpha_vector_learned = hp.average_vectors(alpha_vectors_learned)
+
         alpha_0_relative_error = abs(alpha_vector[0] - mean_alpha_vector_learned[0]) / alpha_vector[0]
         alpha_0_relative_errors.append(alpha_0_relative_error)
 
         mean_alpha_vectors.append(mean_alpha_vector_learned)
         for i in range(len(mean_alpha_vector_learned)):
             print("Current mean alpha " + str(i) + " learned: " + str(mean_alpha_vector_learned[i]))
+            print("Current relative error: " + str(alpha_0_relative_error))
 
         user_1 = Sample_User(mean_alpha_vector_learned, [0 for i in range(len(mean_alpha_vector_learned))])
         for example in sample_tuples:
@@ -146,17 +150,17 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
         ordered_list_generated = [x for x in user_1.get_user_ordered_list()]
 
-        print("Reccomended ordering of newly generated pairs")
-        for i in range(len(ordered_list_generated)):
-            print(str(ordered_list_generated[i]) + " " + str(float(i)))
-        print("\n")
+        #print("Reccomended ordering of newly generated pairs")
+        #for i in range(len(ordered_list_generated)):
+        #    print(str(ordered_list_generated[i]) + " " + str(float(i)))
+        #print("\n")
 
         #print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
         del user_1
         user_virtual.clear_user_history()
         #generate = input()
 
-    
+    '''
     for i in range(len(mean_alpha_vectors[0])):
         y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
         title = "Alpha " + str(i) + " Progress for " + str(margin_from_half*2+1) + " point sampling"
@@ -180,8 +184,10 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.ylabel("Alpha Error Percentage")
         plt.plot([i for i in range(iteration_limit)], y_quantities_2)
         plt.show()
-    
+    '''
 
+    trial_data['relative_alpha_error_after_1_iteration'] = alpha_0_relative_errors[0]
+    trial_data['relative_alpha_error_after_5_iterations'] = alpha_0_relative_errors[4]
     trial_data['relative_alpha_error_after_10_iterations'] = alpha_0_relative_errors[9]
     trial_data['relative_alpha_error_after_15_iterations'] = alpha_0_relative_errors[14]
     trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
@@ -205,16 +211,16 @@ def main():
         alpha_vector = [0.3]
         tolerance_vector = [0.05]
 
-        margins_from_half = [2,3,4,5,6,7,8]
+        margins_from_half = [1,2,3,4,5,6,7,8]
 
+        #iteration_limit = 30
         iteration_limit = 30
-
         
         random_sampling = True
         for setting in margins_from_half:
             reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
 
-
+        
         random_sampling = False
         for setting in margins_from_half:
             reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
