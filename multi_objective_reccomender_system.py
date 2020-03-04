@@ -69,7 +69,7 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 
     return [alpha_vector_learned, ordered_list]
 
-def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half):
+def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half, random_sampling, iteration_limit):
     f = open("user_queries_train.dat", "w")
     f.close()
 
@@ -93,14 +93,13 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20) #figures 1-4 with 11 and 7 points, alpha = 0.3, tolerance = 0.01
     #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=100, noise=20) #figures 1-4 with 11 and 7 points, alpha = 0.3, tolerance = 0.01
 
-    data_subset = hp.get_data_subset(objective_value_tuples, margin_from_half)
+    data_subset = hp.get_data_subset(objective_value_tuples, margin_from_half, random_sampling)
     sample_tuples = data_subset[1]
 
     ordered_list_user = []
     ordered_list_generated = []
     kendall_tau_scores = []
     iteration_number = 0
-    iteration_limit = 10
     generate = '1' #used for interative feedback
     while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
         print("iteration number: " + str(iteration_number))
@@ -121,7 +120,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
             #print("Mean Kendall Tau: " + str(mean_kendall_tau))
 
         objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
-        data_subset = hp.get_data_subset(objective_value_pairs, margin_from_half)
+        data_subset = hp.get_data_subset(objective_value_pairs, margin_from_half, random_sampling)
         sample_tuples = data_subset[1]
         alpha_vectors_learned.append(alpha_vector_learned)
         mean_alpha_vector_learned = hp.average_vectors(alpha_vectors_learned)
@@ -149,6 +148,8 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     for i in range(len(mean_alpha_vectors[0])):
         y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
         title = "Alpha " + str(i) + " Progress for " + str(margin_from_half*2+1) + " point sampling"
+        if random_sampling == True:
+            title += " (random sampling)"
         plt.title(title)
         plt.xlabel("Iteration Number") 
         plt.ylabel("Alpha")
@@ -159,6 +160,8 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
         
         title = "Alpha " + str(i) + " Error Progress for " + str(margin_from_half*2+1) + " point sampling"
+        if random_sampling == True:
+            title += " (random sampling)"
         y_quantities_2 = [(abs(x-alpha_vector[i])/alpha_vector[i])*100 for x in y_quantities_1]
         plt.title(title)
         plt.xlabel("Iteration Number") 
@@ -181,14 +184,29 @@ def main():
         objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
         alpha_vector = [0.3]
         tolerance_vector = [0.01]
-        margin_from_half=4
-        reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half)
-        margin_from_half=5
-        reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half=5)
-        margin_from_half=6
-        reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half=6)
-        margin_from_half=7
-        reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half=7)
+
+        margins_from_half = [4,5,6,7,8]
+
+        iteration_limit = 10
+
+        '''
+        random_sampling = True
+        for setting in margins_from_half:
+            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
+
+
+        random_sampling = False
+        for setting in margins_from_half:
+            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
+        '''
+
+        '''
+        iteration_limit = 40
+        margins_from_half = [11]
+        random_sampling = False
+        for setting in margins_from_half:
+            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
+        '''
 
 
 main()

@@ -162,25 +162,25 @@ def generate_data(id="Test",range_vector = [100, 150, 75, -50, 75, -50], num_poi
 '''
 number of data-points sampled at each iteration equals 2*margin_from_half + 1
 '''
-def get_data_subset(objective_value_tuples, margin_from_half):
+def get_data_subset(objective_value_tuples, margin_from_half, random_sampling):
+    np.random.seed(101) 
     sample_tuples = []
     sample_tuples_list = []
     num_data_points = len(objective_value_tuples)
     half_point = int(num_data_points / 2)
     objective_value_lists = tuples_to_list(objective_value_tuples)
 
-    
-    for i in range(half_point-margin_from_half,half_point+margin_from_half+1):
-        sample_tuples.append(objective_value_tuples[i])
-        sample_tuples_list.append(objective_value_lists[i])
+    if random_sampling == False:
+        for i in range(half_point-margin_from_half,half_point+margin_from_half+1):
+            sample_tuples.append(objective_value_tuples[i])
+            sample_tuples_list.append(objective_value_lists[i])
     
     
 
-    '''
-    #idea in progress: ensure that no pair is dominated
-    for i in range(5):
-        sample_pairs.append(random.choice(objective_value_pairs))
-    '''
+    if random_sampling == True:
+        for i in range(margin_from_half*2+1):
+            sample_tuples.append(random.choice(objective_value_tuples))
+    
     
     '''
     while len(sample_pairs) != 5:
