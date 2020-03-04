@@ -70,6 +70,14 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
     return [alpha_vector_learned, ordered_list]
 
 def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half, random_sampling, iteration_limit):
+
+    trial_data = {'num_points_each_iteration': margin_from_half*2+1, 'random_sampling': random_sampling, 
+                  'relative_alpha_error_after_10_iterations': 0, 
+                  'relative_alpha_error_after_15_iterations': 0,
+                  'relative_alpha_error_after_20_iterations': 0,
+                  'relative_alpha_error_after_25_iterations': 0,
+                  'relative_alpha_error_after_30_iterations': 0}
+
     f = open("user_queries_train.dat", "w")
     f.close()
 
@@ -77,6 +85,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
     alpha_vectors_learned = []
     mean_alpha_vectors = [] #used to track progress of reccomendation system
+    alpha_0_relative_errors = [] #might be temp
 
     #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=300, func2_upper=150, func2_lower=-50, num_points=500, noise=10)
     #objective_value_pairs = hp.generate_data(func1_lower=200, func1_upper=400, func2_upper=150, func2_lower=-50, num_points=500, noise=20)
@@ -124,6 +133,8 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         sample_tuples = data_subset[1]
         alpha_vectors_learned.append(alpha_vector_learned)
         mean_alpha_vector_learned = hp.average_vectors(alpha_vectors_learned)
+        alpha_0_relative_error = abs(alpha_vector[0] - mean_alpha_vector_learned[0]) / alpha_vector[0]
+        alpha_0_relative_errors.append(alpha_0_relative_error)
 
         mean_alpha_vectors.append(mean_alpha_vector_learned)
         for i in range(len(mean_alpha_vector_learned)):
@@ -145,6 +156,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         user_virtual.clear_user_history()
         #generate = input()
 
+    
     for i in range(len(mean_alpha_vectors[0])):
         y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
         title = "Alpha " + str(i) + " Progress for " + str(margin_from_half*2+1) + " point sampling"
@@ -168,8 +180,14 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.ylabel("Alpha Error Percentage")
         plt.plot([i for i in range(iteration_limit)], y_quantities_2)
         plt.show()
-        
+    
 
+    trial_data['relative_alpha_error_after_10_iterations'] = alpha_0_relative_errors[9]
+    trial_data['relative_alpha_error_after_15_iterations'] = alpha_0_relative_errors[14]
+    trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
+    trial_data['relative_alpha_error_after_25_iterations'] = alpha_0_relative_errors[24]
+    trial_data['relative_alpha_error_after_30_iterations'] = alpha_0_relative_errors[29]
+    trials_data.append(trial_data)
 
     return 
 
@@ -181,15 +199,17 @@ def main():
     if len(sys.argv) == 2 and sys.argv[1] == "it":
         it.reccomend_pairs()
     else:
-        objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
+        #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
+        objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=50)
+
         alpha_vector = [0.3]
-        tolerance_vector = [0.01]
+        tolerance_vector = [0.05]
 
-        margins_from_half = [4,5,6,7,8]
+        margins_from_half = [2,3,4,5,6,7,8]
 
-        iteration_limit = 10
+        iteration_limit = 30
 
-        '''
+        
         random_sampling = True
         for setting in margins_from_half:
             reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
@@ -198,16 +218,10 @@ def main():
         random_sampling = False
         for setting in margins_from_half:
             reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
-        '''
+        
 
-        '''
-        iteration_limit = 40
-        margins_from_half = [11]
-        random_sampling = False
-        for setting in margins_from_half:
-            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
-        '''
-
+        df = pd.DataFrame(trials_data)
+        df.to_excel("experiment_results.xlsx")
 
 main()
 
