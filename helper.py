@@ -233,5 +233,59 @@ def graph_hyperplane(user_objective_values, objective_value_lists, func1_lower, 
 
     return
 
-def graph_alphas():
+def create_latex_files():
+    f_random = open("random_sampling.txt", "w")
+    f_random.write("Data-points Sampled at Random\\\\" + "\n")
+    f_random.write("\\begin{tabular}{ccccc}" + "\n")
+    f_random.write("\\hline" + "\n")
+    f_random.write("$x$ & $RE_{1}$ & $RE_{5}$ & $RE_{10}$ & $RE_{15}$\\\\" + "\n")
+    f_random.write("\\hline" + "\n")
+    f_random.close()
+
+    f_middle = open("middle_sampling.txt", "w")
+    f_middle.write("Data-points Sampled from Middle First\\\\" + "\n")
+    f_middle.write("\\begin{tabular}{ccccc}" + "\n")
+    f_middle.write("\\hline" + "\n")
+    f_middle.write("$x$ & $RE_{1}$ & $RE_{5}$ & $RE_{10}$ & $RE_{15}$\\\\" + "\n")
+    f_middle.write("\\hline" + "\n")
+    f_middle.close()
+
+    return
+
+def populate_latex_files(df):    
+    f_random = open("random_sampling.txt", "a")
+    f_middle = open("middle_sampling.txt", "a")
+    
+    for index, row in df.iterrows():
+        print(row['random_sampling'])
+        if row['random_sampling'] == True:
+            f_random.write(str(row['num_points_each_iteration']) + " & " + 
+                    str(row['relative_alpha_error_after_iteration_1']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_5']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_10']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_15']) + "\\\\" + "\n")
+        else:
+            f_middle.write(str(row['num_points_each_iteration']) + " & " + 
+                    str(row['relative_alpha_error_after_iteration_1']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_5']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_10']) + " & " +
+                    str(row['relative_alpha_error_after_iteration_15']) + "\\\\" + "\n")
+
+    
+    f_random.close()
+    f_middle.close()
+
+    return
+
+def finish_latex_files():
+    f_random = open("random_sampling.txt", "a")
+    f_random.write("\\hline" + "\n")
+    f_random.write("\\end{tabular}")
+    f_random.close()
+
+    f_middle = open("middle_sampling.txt", "a")
+    f_middle.write("\\hline" + "\n")
+    f_middle.write("\\end{tabular}")
+    f_middle.close()
+
     return

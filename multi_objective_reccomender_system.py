@@ -161,7 +161,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         user_virtual.clear_user_history()
         #generate = input()
 
-    
+    '''
     for i in range(len(mean_alpha_vectors[0])):
         y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
         title = "Alpha " + str(i) + " Progress for " + str(margin_from_half*2+1) + " point sampling"
@@ -185,7 +185,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.ylabel("Alpha Error Percentage")
         plt.plot([i for i in range(iteration_limit)], y_quantities_2)
         plt.show()
-    
+    '''
 
     trial_data['relative_alpha_error_after_1_iteration'] = alpha_0_relative_errors[0]
     trial_data['relative_alpha_error_after_5_iterations'] = alpha_0_relative_errors[4]
@@ -194,6 +194,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     #trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
     #trial_data['relative_alpha_error_after_25_iterations'] = alpha_0_relative_errors[24]
     #trial_data['relative_alpha_error_after_30_iterations'] = alpha_0_relative_errors[29]
+    
     trials_data.append(trial_data)
 
     return 
@@ -208,14 +209,14 @@ def main():
     else:
         #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
         #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=50)
+        hp.create_latex_files()
+
         objective_value_tuples = application_data.generate_stock_objective_values()
 
         alpha_vector = [0.3]
         tolerance_vector = [0.05]
 
         margins_from_half = [1,2,3,4,5,6,7,8]
-
-        margins_from_half = [5,6,7]
 
         #iteration_limit = 30
         iteration_limit = 15
@@ -232,6 +233,9 @@ def main():
 
         df = pd.DataFrame(trials_data)
         df.to_excel("experiment_results.xlsx")
+
+        hp.populate_latex_files(df)
+        hp.finish_latex_files()
 
         #idea: change user's alpha value for more data
 

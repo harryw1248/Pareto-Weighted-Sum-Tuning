@@ -1,0 +1,15 @@
+Data-points Sampled from Middle First\\
+\begin{tabular}{ccccc}
+\hline
+$x$ & $RE_{1}$ & $RE_{5}$ & $RE_{10}$ & $RE_{15}$\\
+\hline
+3&1&1&1&1\\
+5&1&1&1&1\\
+7&1&1&1&1\\
+9&1&1&1&1\\
+11&1&1&1&1\\
+13&1&1&1&1\\
+15&1&1&1&1\\
+17&1&1&1&1\\
+\hline
+\end{tabular}

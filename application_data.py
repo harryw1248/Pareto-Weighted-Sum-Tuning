@@ -77,7 +77,7 @@ def generate_stock_objective_values():
     plt.xlabel('Optimistic Gain') 
     plt.ylabel('Pessimistic Loss') 
     plt.scatter([x[0] for x in objective_value_tuples], [y[1] for y in objective_value_tuples], color="blue") 
-    plt.show()
+    #plt.show()
 
     return objective_value_tuples
 
