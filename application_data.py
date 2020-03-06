@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 def binomial_model(N, S0, u, r, K):
@@ -37,18 +38,39 @@ def binomial_model(N, S0, u, r, K):
     return stock
 
 def generate_stock_objective_values():
+    np.random.seed(101) 
     factor_change = 1.3
     price = 30
     objective_value_tuples = []
 
     for i in range(10):
         for j in range(20):
-            stock_prices = binomial_model(2, price, factor_change, 0.25, 8)
-            optimistic_gain = stock_prices[0][1] - price
-            pessimistic_loss = stock_prices[1][1] - price
-            objective_value_tuples.append((optimistic_gain,pessimistic_loss))
+            stock_prices = binomial_model(1, price, factor_change, 0.25, 8)
+
+            random_factor = np.random.uniform(0.90, 1.1)
+
+            optimistic_gain_0 = (stock_prices[0][1] - price) * random_factor
+            pessimistic_loss_0 = (stock_prices[1][1] - price) * random_factor
+
+            
+            random_factor = np.random.uniform(0.90, 1.1)
+            optimistic_gain_1 = (stock_prices[0][1] - price) * random_factor
+            random_factor = np.random.uniform(0.90, 1.1)
+            pessimistic_loss_1 = (stock_prices[1][1] - price) * random_factor
+
+            random_factor = np.random.uniform(0.90, 1.1)
+            optimistic_gain_2 = (stock_prices[0][1] - price) * random_factor
+            random_factor = np.random.uniform(0.90, 1.1)
+            pessimistic_loss_2 = (stock_prices[1][1] - price) * random_factor
+            
+
+            objective_value_tuples.append((optimistic_gain_0,pessimistic_loss_0))
+            objective_value_tuples.append((optimistic_gain_1,pessimistic_loss_1))
+            objective_value_tuples.append((optimistic_gain_2,pessimistic_loss_2))
+            
+
             factor_change += 0.01
-        price += 0.01
+        price += 0.05
 
 
     plt.title("Objective Value Pairs")
