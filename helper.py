@@ -150,7 +150,6 @@ def generate_data(id="Test",range_vector = [100, 150, 75, -50, 75, -50], num_poi
             tuple_list.append(objective_value_array[i])
         objective_value_tuples.append(tuple(tuple_list))
     
-    #objective_value_pairs = get_non_dominated(objective_value_pairs)
     plt.title("Objective Value Pairs " + str(id))
     plt.xlabel('weighted_value') 
     plt.ylabel('max_worst_case') 
