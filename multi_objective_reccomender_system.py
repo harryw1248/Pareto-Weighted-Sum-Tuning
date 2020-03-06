@@ -9,6 +9,7 @@ from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 from statistics import mean 
 import interactive as it
+import application_data
 
 
 trials_data = []
@@ -160,7 +161,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         user_virtual.clear_user_history()
         #generate = input()
 
-    '''
+    
     for i in range(len(mean_alpha_vectors[0])):
         y_quantities_1 = [mean_alpha_vector[i] for mean_alpha_vector in mean_alpha_vectors]
         title = "Alpha " + str(i) + " Progress for " + str(margin_from_half*2+1) + " point sampling"
@@ -184,15 +185,15 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.ylabel("Alpha Error Percentage")
         plt.plot([i for i in range(iteration_limit)], y_quantities_2)
         plt.show()
-    '''
+    
 
     trial_data['relative_alpha_error_after_1_iteration'] = alpha_0_relative_errors[0]
     trial_data['relative_alpha_error_after_5_iterations'] = alpha_0_relative_errors[4]
     trial_data['relative_alpha_error_after_10_iterations'] = alpha_0_relative_errors[9]
     trial_data['relative_alpha_error_after_15_iterations'] = alpha_0_relative_errors[14]
-    trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
-    trial_data['relative_alpha_error_after_25_iterations'] = alpha_0_relative_errors[24]
-    trial_data['relative_alpha_error_after_30_iterations'] = alpha_0_relative_errors[29]
+    #trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
+    #trial_data['relative_alpha_error_after_25_iterations'] = alpha_0_relative_errors[24]
+    #trial_data['relative_alpha_error_after_30_iterations'] = alpha_0_relative_errors[29]
     trials_data.append(trial_data)
 
     return 
@@ -206,15 +207,18 @@ def main():
         it.reccomend_pairs()
     else:
         #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
-        objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=50)
+        #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=50)
+        objective_value_tuples = application_data.generate_stock_objective_values()
 
         alpha_vector = [0.3]
         tolerance_vector = [0.05]
 
         margins_from_half = [1,2,3,4,5,6,7,8]
 
+        margins_from_half = [5,6,7]
+
         #iteration_limit = 30
-        iteration_limit = 30
+        iteration_limit = 15
         
         random_sampling = True
         for setting in margins_from_half:
