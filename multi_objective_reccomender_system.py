@@ -73,13 +73,10 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half, random_sampling, iteration_limit):
 
     trial_data = {'num_points_each_iteration': margin_from_half*2+1, 'random_sampling': random_sampling, 
-                  'relative_alpha_error_after_iteration_1': 1,
-                  'relative_alpha_error_after_iteration_5': 1,
-                  'relative_alpha_error_after_iteration_10': 1, 
-                  'relative_alpha_error_after_iteration_15': 1,
-                  'relative_alpha_error_after_iteration_20': 1,
-                  'relative_alpha_error_after_iteration_25': 1,
-                  'relative_alpha_error_after_iteration_30': 1}
+                  'relative_alpha_error_after_iteration_1': None,
+                  'relative_alpha_error_after_iteration_5': None,
+                  'relative_alpha_error_after_iteration_10': None, 
+                  'relative_alpha_error_after_iteration_15': None,}
 
     f = open("user_queries_train.dat", "w")
     f.close()
@@ -187,13 +184,10 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.show()
     '''
 
-    trial_data['relative_alpha_error_after_1_iteration'] = alpha_0_relative_errors[0]
-    trial_data['relative_alpha_error_after_5_iterations'] = alpha_0_relative_errors[4]
-    trial_data['relative_alpha_error_after_10_iterations'] = alpha_0_relative_errors[9]
-    trial_data['relative_alpha_error_after_15_iterations'] = alpha_0_relative_errors[14]
-    #trial_data['relative_alpha_error_after_20_iterations'] = alpha_0_relative_errors[19]
-    #trial_data['relative_alpha_error_after_25_iterations'] = alpha_0_relative_errors[24]
-    #trial_data['relative_alpha_error_after_30_iterations'] = alpha_0_relative_errors[29]
+    trial_data['relative_alpha_error_after_iteration_1'] = alpha_0_relative_errors[0]
+    trial_data['relative_alpha_error_after_iteration_5'] = alpha_0_relative_errors[4]
+    trial_data['relative_alpha_error_after_iteration_10'] = alpha_0_relative_errors[9]
+    trial_data['relative_alpha_error_after_iteration_15'] = alpha_0_relative_errors[14]
     
     trials_data.append(trial_data)
 

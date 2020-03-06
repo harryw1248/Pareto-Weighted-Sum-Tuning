@@ -257,7 +257,6 @@ def populate_latex_files(df):
     f_middle = open("middle_sampling.txt", "a")
     
     for index, row in df.iterrows():
-        print(row['random_sampling'])
         if row['random_sampling'] == True:
             f_random.write(str(row['num_points_each_iteration']) + " & " + 
                     str(row['relative_alpha_error_after_iteration_1']) + " & " +
