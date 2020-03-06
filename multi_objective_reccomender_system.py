@@ -229,5 +229,7 @@ def main():
         df = pd.DataFrame(trials_data)
         df.to_excel("experiment_results.xlsx")
 
+        #idea: change user's alpha value for more data
+
 main()
 

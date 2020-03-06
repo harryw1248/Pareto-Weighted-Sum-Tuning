@@ -37,18 +37,18 @@ def binomial_model(N, S0, u, r, K):
     return stock
 
 def generate_stock_objective_values():
-    risk = 2.0
-    price = 40
+    factor_change = 1.3
+    price = 30
     objective_value_tuples = []
 
-    for i in range(1):
-        for j in range(21):
-            stock_prices = binomial_model(2, price, risk, 0.25, 8)
+    for i in range(10):
+        for j in range(20):
+            stock_prices = binomial_model(2, price, factor_change, 0.25, 8)
             optimistic_gain = stock_prices[0][1] - price
             pessimistic_loss = stock_prices[1][1] - price
             objective_value_tuples.append((optimistic_gain,pessimistic_loss))
-            risk += 0.1
-        price += 5
+            factor_change += 0.01
+        price += 0.01
 
 
     plt.title("Objective Value Pairs")
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     op_price = binomial_model(2, 5, 2, 0.25, 8)
     op_price = binomial_model(2, 5, 2.1, 0.25, 8)
 
-    op_price = binomial_model(1, 40, 2, 0.25, 8)
-    op_price = binomial_model(1, 40, 2.3, 0.25, 8)
+    op_price = binomial_model(1, 40, 2, 0.25, 10)
+    op_price = binomial_model(1, 40, 2, 0.6, 10)
     '''
     generate_stock_objective_values()
 
