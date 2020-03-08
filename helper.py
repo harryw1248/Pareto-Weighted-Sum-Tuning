@@ -259,16 +259,16 @@ def populate_latex_files(df):
     for index, row in df.iterrows():
         if row['random_sampling'] == True:
             f_random.write(str(row['num_points_each_iteration']) + " & " + 
-                    str(row['relative_alpha_error_after_iteration_1']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_5']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_10']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_15']) + "\\\\" + "\n")
+                    str(format(row['relative_alpha_error_after_iteration_1']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_5']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_10']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_15']*100,'.4g')) + "\\\\" + "\n")
         else:
             f_middle.write(str(row['num_points_each_iteration']) + " & " + 
-                    str(row['relative_alpha_error_after_iteration_1']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_5']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_10']) + " & " +
-                    str(row['relative_alpha_error_after_iteration_15']) + "\\\\" + "\n")
+                    str(format(row['relative_alpha_error_after_iteration_1']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_5']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_10']*100,'.4g')) + " & " +
+                    str(format(row['relative_alpha_error_after_iteration_15']*100,'.4g')) + "\\\\" + "\n")
 
     
     f_random.close()

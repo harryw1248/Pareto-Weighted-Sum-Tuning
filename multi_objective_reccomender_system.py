@@ -13,6 +13,7 @@ import application_data
 
 
 trials_data = []
+plot_lines = []
 
 def users_kendall_tau(user_1, user_2, objective_value_pairs):
 
@@ -173,14 +174,18 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
         plt.show()
 
         
-        title = "Alpha " + str(i) + " Error Progress for " + str(margin_from_half*2+1) + " point sampling"
+        title = "Alpha " + str(i) + " Relative Error Progress for " + str(margin_from_half*2+1) + " point sampling"
         if random_sampling == True:
             title += " (random sampling)"
         y_quantities_2 = [(abs(x-alpha_vector[i])/alpha_vector[i])*100 for x in y_quantities_1]
         plt.title(title)
         plt.xlabel("Iteration Number") 
         plt.ylabel("Alpha Error Percentage")
-        plt.plot([i for i in range(iteration_limit)], y_quantities_2)
+        relative_error_plot_name = str(margin_from_half*2+1) + " point sampling"
+        relative_error_plot = plt.plot([i for i in range(iteration_limit)], y_quantities_2, label=relative_error_plot_name)
+
+
+        plt.legend()
         plt.show()
     '''
 
@@ -190,6 +195,8 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     trial_data['relative_alpha_error_after_iteration_15'] = alpha_0_relative_errors[14]
     
     trials_data.append(trial_data)
+    alpha_0_relative_errors = [x*100 for x in alpha_0_relative_errors]
+    plot_lines.append(alpha_0_relative_errors)
 
     return 
 
@@ -210,26 +217,38 @@ def main():
         alpha_vector = [0.3]
         tolerance_vector = [0.05]
 
-        margins_from_half = [1,2,3,4,5,6,7,8]
+        #margins_from_half = [1,2,3,4,]
+        margins_from_half = [5,6,7,8]
 
         #iteration_limit = 30
         iteration_limit = 15
         
-        random_sampling = True
-        for setting in margins_from_half:
-            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
-
-        
+        #random_sampling = True
         random_sampling = False
         for setting in margins_from_half:
             reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
-        
 
         df = pd.DataFrame(trials_data)
         df.to_excel("experiment_results.xlsx")
 
         hp.populate_latex_files(df)
         hp.finish_latex_files()
+
+        #title = "Alpha Relative Error Progress (Random Sampling)"
+        title = "Alpha Relative Error Progress"
+        plt.title(title)
+        plt.xlabel("Iteration Number") 
+        plt.ylabel("Alpha Error Percentage")
+
+
+        for i in range(len(margins_from_half)):
+            relative_error_plot_name = str(margins_from_half[i]*2+1) + " point sampling"
+            relative_error_plot = plt.plot([i for i in range(iteration_limit)], plot_lines[i], label=relative_error_plot_name)
+
+        plt.legend()
+        plt.show()
+
+
 
         #idea: change user's alpha value for more data
 
