@@ -5,10 +5,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import helper as hp 
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sample_user_rank import Sample_User
 from statistics import mean 
-import interactive as it
 import application_data
 
 
@@ -204,53 +202,46 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
 def main():
 
-    #reccomend_pairs()
-    if len(sys.argv) == 2 and sys.argv[1] == "it":
-        it.reccomend_pairs()
-    else:
-        #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=20)
-        #objective_value_tuples = hp.generate_data(range_vector = [100, 200, 100, -50], num_points=500, noise=50)
-        hp.create_latex_files()
+    hp.create_latex_files()
 
-        objective_value_tuples = application_data.generate_stock_objective_values()
+    objective_value_tuples = application_data.generate_stock_objective_values()
 
-        alpha_vector = [0.3]
-        tolerance_vector = [0.05]
+    alpha_vector = [0.3]
+    tolerance_vector = [0.05]
 
-        #margins_from_half = [1,2,3,4,]
-        margins_from_half = [5,6,7,8]
+    #margins_from_half = [1,2,3,4,]
+    margins_from_half = [5,6,7,8]
 
-        #iteration_limit = 30
-        iteration_limit = 15
+    #iteration_limit = 30
+    iteration_limit = 15
         
-        #random_sampling = True
-        random_sampling = False
-        for setting in margins_from_half:
-            reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
+    #random_sampling = True
+    random_sampling = False
+    for setting in margins_from_half:
+        reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
 
-        df = pd.DataFrame(trials_data)
-        df.to_excel("experiment_results.xlsx")
+    df = pd.DataFrame(trials_data)
+    df.to_excel("experiment_results.xlsx")
 
-        hp.populate_latex_files(df)
-        hp.finish_latex_files()
+    hp.populate_latex_files(df)
+    hp.finish_latex_files()
 
-        #title = "Alpha Relative Error Progress (Random Sampling)"
-        title = "Alpha Relative Error Progress"
-        plt.title(title)
-        plt.xlabel("Iteration Number") 
-        plt.ylabel("Alpha Error Percentage")
-
-
-        for i in range(len(margins_from_half)):
-            relative_error_plot_name = str(margins_from_half[i]*2+1) + " point sampling"
-            relative_error_plot = plt.plot([i for i in range(iteration_limit)], plot_lines[i], label=relative_error_plot_name)
-
-        plt.legend()
-        plt.show()
+    #title = "Alpha Relative Error Progress (Random Sampling)"
+    title = "Alpha Relative Error Progress"
+    plt.title(title)
+    plt.xlabel("Iteration Number") 
+    plt.ylabel("Alpha Error Percentage")
 
 
+    for i in range(len(margins_from_half)):
+        relative_error_plot_name = str(margins_from_half[i]*2+1) + " point sampling"
+        relative_error_plot = plt.plot([i for i in range(iteration_limit)], plot_lines[i], label=relative_error_plot_name)
 
-        #idea: change user's alpha value for more data
+    plt.legend()
+    plt.show()
+
+
+
 
 main()
 
