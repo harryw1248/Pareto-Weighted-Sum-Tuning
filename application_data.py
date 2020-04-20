@@ -21,8 +21,8 @@ def binomial_model(N, S0, u, r, K):
         for j in range(i + 1):
             stock[j, i] = S0 * (u ** (i - j)) * (d ** j)
     
-    print("stock")
-    print(stock)
+    #print("stock")
+    #print(stock)
 
     '''
     # Generate option prices recursively
