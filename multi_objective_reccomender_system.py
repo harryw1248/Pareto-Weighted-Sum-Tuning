@@ -13,19 +13,6 @@ import application_data
 trials_data = []
 plot_lines = []
 
-def users_kendall_tau(user_1, user_2, objective_value_pairs):
-
-    for example in objective_value_pairs:
-        user_1.user_decision(example)
-    
-    for example in objective_value_pairs:
-        user_2.user_decision(example)
-    
-    user_1_rank_indices = user_1.get_user_rank_indices()
-    user_2_rank_indices = user_2.get_user_rank_indices()
-    tau = hp.compute_kendall_tau(user_1_rank_indices, user_2_rank_indices)
-
-    return tau
 
 def user_feedback(sample_pairs, user_virtual, iteration_number):
     user_rank_indices = {}
@@ -91,7 +78,6 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
     ordered_list_user = []
     ordered_list_generated = []
-    kendall_tau_scores = []
     iteration_number = 0
     generate = '1' #used for interative feedback
     while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
@@ -104,13 +90,6 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
             print("Iteration alpha " + str(i) + " learned: " + str(alpha_vector_learned[i]))
 
         ordered_list_user = user_feedback_results[1]
-
-        if(len(ordered_list_user) != 0 and len(ordered_list_generated) != 0):
-            tau = 0.5#hp.compute_kendall_tau(ordered_list_user, ordered_list_generated, list=True)
-            kendall_tau_scores.append(tau)
-            mean_kendall_tau = mean(kendall_tau_scores)
-            #print("Iteration Kendall Tau: " + str(tau))
-            #print("Mean Kendall Tau: " + str(mean_kendall_tau))
 
         objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
         data_subset = hp.get_data_subset(objective_value_pairs, margin_from_half, random_sampling)
@@ -155,7 +134,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
     
 
-def experiment(margins_from_half):
+def experiment():
 
     hp.create_latex_files()
 
@@ -164,8 +143,8 @@ def experiment(margins_from_half):
     alpha_vector = [0.3]
     tolerance_vector = [0.05]
 
-    #margins_from_half = [1,2,3,4]
-    margins_from_half = [5,6,7,8]
+    margins_from_half = [1,2,3,4]
+    #margins_from_half = [5,6,7,8]
 
     #iteration_limit = 30
     iteration_limit = 15
@@ -196,13 +175,10 @@ def experiment(margins_from_half):
         #print(plot_lines[i])
 
     plt.legend()
-    #plt.show()
+    plt.show()
     return plot_lines
-    '''
-    idea: use pickle files
-    initialize list
-    load 
-    '''
+
+experiment()
 
 
 

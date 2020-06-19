@@ -1,7 +1,0 @@
-Data-points Sampled from Middle First\\
-\begin{tabular}{ccccc}
-\hline
-$x$ & $RE_{1}$ & $RE_{5}$ & $RE_{10}$ & $RE_{15}$\\
-\hline
-\hline
-\end{tabular}

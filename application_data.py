@@ -13,7 +13,6 @@ def binomial_model(N, S0, u, r, K):
     """
     d = 1 / u
     p = (1 + r - d) / (u - d)
-    q = 1 - p
 
     # make stock price tree
     stock = np.zeros([N + 1, N + 1])
@@ -21,23 +20,12 @@ def binomial_model(N, S0, u, r, K):
         for j in range(i + 1):
             stock[j, i] = S0 * (u ** (i - j)) * (d ** j)
     
-    #print("stock")
-    #print(stock)
-
-    '''
-    # Generate option prices recursively
-    option = np.zeros([N + 1, N + 1])
-    option[:, N] = np.maximum(np.zeros(N + 1), (stock[:, N] - K))
-    for i in range(N - 1, -1, -1):
-        for j in range(0, i + 1):
-            option[j, i] = (
-                1 / (1 + r) * (p * option[j, i + 1] + q * option[j + 1, i + 1])
-            )
-    return option
-    '''
     return stock
 
 def generate_stock_objective_values():
+    """
+    Runs Binomial Pricing Tree Model Several Times to create application data-set
+    """
     np.random.seed(101) 
     factor_change = 1.3
     price = 30
@@ -71,13 +59,5 @@ def generate_stock_objective_values():
 
             factor_change += 0.01
         price += 0.05
-
-    '''
-    plt.title("Objective Value Pairs")
-    plt.xlabel('Optimistic Gain') 
-    plt.ylabel('Pessimistic Loss') 
-    plt.scatter([x[0] for x in objective_value_tuples], [y[1] for y in objective_value_tuples], color="blue") 
-    plt.show()
-    '''
 
     return objective_value_tuples

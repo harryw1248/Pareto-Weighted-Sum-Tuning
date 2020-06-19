@@ -10,7 +10,7 @@ class Sample_User:
 
     #Notes: introduce tolerance(noise) and figure out best user_decision data structure
 
-    alpha_vector = [0.2, 0.5]
+    alpha_vector = [0.3, 0.5]
     tolerance_vector = [0.05, 0.05] 
 
 
@@ -29,7 +29,6 @@ class Sample_User:
         self.user_objective_values.clear()
         self.user_rank_indices.clear()
         del self.ordered_list[:]
-        #print('Destructor called, Object deleted.')
     
     def clear_user_history(self):
         self.user_objective_values.clear()
@@ -49,7 +48,6 @@ class Sample_User:
         self.ordered_list = [x[0] for x in results[1]]
         return self.ordered_list
 
-    #Note: how should we model fluctuation? uniform? normal?
     def user_decision(self, objective_value_tuple):
         
         np.random.seed(101) 
