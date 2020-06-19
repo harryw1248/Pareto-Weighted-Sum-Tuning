@@ -23,11 +23,9 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
 
     ordered_list_generated = [x for x in user_virtual.get_user_ordered_list()]
 
-    #print("Virtual User Decisions")
     f = open("user_queries_train.dat", "a")
     f.write("# query " + str(iteration_number) + "\n")
     for i in range(len(ordered_list_generated)):
-    #    print(str(ordered_list_generated[i]) + " " + str(float(i)))
         f.write(str(i) + " qid:" + str(iteration_number) + " ")
         for j in range(len(ordered_list_generated[i])):
             f.write(str(j+1) + ":" + str(ordered_list_generated[i][j]) + " ")
@@ -76,10 +74,7 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     data_subset = hp.get_data_subset(objective_value_tuples, margin_from_half, random_sampling)
     sample_tuples = data_subset[1]
 
-    ordered_list_user = []
-    ordered_list_generated = []
     iteration_number = 0
-    generate = '1' #used for interative feedback
     while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
         #print("iteration number: " + str(iteration_number))
         iteration_number += 1
@@ -88,8 +83,6 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
         for i in range(len(alpha_vector_learned)):
             print("Iteration alpha " + str(i) + " learned: " + str(alpha_vector_learned[i]))
-
-        ordered_list_user = user_feedback_results[1]
 
         objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
         data_subset = hp.get_data_subset(objective_value_pairs, margin_from_half, random_sampling)
@@ -107,19 +100,10 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
 
         user_1 = Sample_User(mean_alpha_vector_learned, [0 for i in range(len(mean_alpha_vector_learned))])
         for example in sample_tuples:
-            user_1.user_decision(example) #need ordered list and ranks after this?
+            user_1.user_decision(example) 
 
-        ordered_list_generated = [x for x in user_1.get_user_ordered_list()]
-
-        #print("Reccomended ordering of newly generated pairs")
-        #for i in range(len(ordered_list_generated)):
-        #    print(str(ordered_list_generated[i]) + " " + str(float(i)))
-        #print("\n")
-
-        #print("Continue generating ranked pairs? Enter 1 for yes and 0 for no\n")
         del user_1
         user_virtual.clear_user_history()
-        #generate = input()
 
     trial_data['relative_alpha_error_after_iteration_1'] = alpha_0_relative_errors[0]
     trial_data['relative_alpha_error_after_iteration_5'] = alpha_0_relative_errors[4]
@@ -130,13 +114,12 @@ def reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, marg
     alpha_0_relative_errors = [x*100 for x in alpha_0_relative_errors]
     plot_lines.append(alpha_0_relative_errors)
 
-    return 
+    print("mean_alpha_vectors[-1]: " + str(mean_alpha_vectors[-1]))
+    return mean_alpha_vectors[-1]
 
     
 
-def experiment():
-
-    hp.create_latex_files()
+def pareto_weighted_sum_tuning():
 
     objective_value_tuples = application_data.generate_stock_objective_values()
 
@@ -154,15 +137,7 @@ def experiment():
     for setting in margins_from_half:
         reccomend_pairs(objective_value_tuples, alpha_vector, tolerance_vector, setting, random_sampling, iteration_limit)
 
-    df = pd.DataFrame(trials_data)
-    df.to_excel("experiment_results.xlsx")
-
-    hp.populate_latex_files(df)
-    hp.finish_latex_files()
-
-    #title = "Alpha Relative Error Progress"
-
-    title = "Alpha Relative Error Progress (Random Sampling)"
+    title = "Alpha Relative Error Progress"
     plt.title(title)
     plt.xlabel("Iteration Number") 
     plt.ylabel("Alpha Error Percentage")
@@ -178,9 +153,7 @@ def experiment():
     plt.show()
     return plot_lines
 
-experiment()
-
-
+pareto_weighted_sum_tuning()
 
 
 
