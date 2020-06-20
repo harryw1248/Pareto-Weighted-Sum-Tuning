@@ -1,5 +1,5 @@
 # Pareto-Weighted-Sum-Tuning
-The Pareto-Weighted-Sum-Tuning (PWST) utilizes Learning-to-Rank Machine Learning to help solve Pareto (Multiobjective, Multicriteria) Optimization Problems.
+The Pareto-Weighted-Sum-Tuning (PWST) utilizes Learning-to-Rank Machine Learning to help solve Pareto (Multiobjective, Multicriteria) Optimization Problems. It was proposed and invented by Harry Wang during his time as an Undergraduate Researcher and Computer Science student at the University of Michigan-Ann Arbor, College of Engineering.
 This codebase utilizes PWST to run experiments with a sample user/decision-maker on an example stock-pricing dataset.
 
 # Pareto-Weighted-Sum-Tuning Abstract
