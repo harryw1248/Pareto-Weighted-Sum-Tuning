@@ -1,3 +1,7 @@
+"""
+Used for generating stock model data-set
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import random

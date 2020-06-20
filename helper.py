@@ -1,3 +1,4 @@
+import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +18,6 @@ def get_rankings(objective_values, rank_indices):
         
     objective_values_list.sort(key = lambda x: x[1])  
     ordered_list = [x for x in objective_values_list]
-    #num_items = len(objective_values)
 
     for pair in objective_values:
         rank_index = 0.0
@@ -47,47 +47,52 @@ def average_vectors(vectors):
 
     return result
 
-def dominates(pair1, pair2):
-    if pair1[0] > pair2[0] and pair1[1] > pair2[1]:
-        return True
-    return False
-
-def get_non_dominated(objective_value_pairs):
-    non_dominated_pairs = []
-    for i in range(len(objective_value_pairs)):
-        dominated = False
-        for j in range(len(objective_value_pairs)):
-            if dominates(objective_value_pairs[j], objective_value_pairs[i]):
-                dominated = True
-        if dominated == False:
-            non_dominated_pairs.append(objective_value_pairs[i])
-    non_dominated_pairs = sorted(non_dominated_pairs, key=lambda x: x[0])
-    print("Number of Non-Dominated Pairs: " + str(len(non_dominated_pairs)))
-    return non_dominated_pairs
-
-'''
-number of data-points sampled at each iteration equals 2*margin_from_half + 1
-'''
-def get_data_subset(objective_value_tuples, margin_from_half, random_sampling):
+def get_data_subset(objective_value_tuples, points_per_iteration):
     np.random.seed(101) 
     sample_tuples = []
     sample_tuples_list = []
-    num_data_points = len(objective_value_tuples)
-    half_point = int(num_data_points / 2)
     objective_value_lists = tuples_to_list(objective_value_tuples)
 
-    if random_sampling == False:
-        for i in range(half_point-margin_from_half,half_point+margin_from_half+1):
-            sample_tuples.append(objective_value_tuples[i])
-            sample_tuples_list.append(objective_value_lists[i])
-    
-    
-
-    if random_sampling == True:
-        for i in range(margin_from_half*2+1):
-            sample_tuples.append(random.choice(objective_value_tuples))
-    
-    
-    #sample_pairs_list = tuples_to_list(sample_pairs)
+    for i in range(points_per_iteration):
+        sample_tuples.append(random.choice(objective_value_tuples))
     
     return [objective_value_lists, sample_tuples, sample_tuples_list]
+
+def user_feedback(sample_pairs, user_virtual, iteration_number):
+    user_rank_indices = {}
+
+    for example in sample_pairs:
+        user_virtual.user_decision(example)
+
+    ordered_list_generated = [x for x in user_virtual.get_user_ordered_list()]
+
+    f = open("svm_rank/user_queries_train.dat", "a")
+    f.write("# query " + str(iteration_number) + "\n")
+    for i in range(len(ordered_list_generated)):
+        f.write(str(i) + " qid:" + str(iteration_number) + " ")
+        for j in range(len(ordered_list_generated[i])):
+            f.write(str(j+1) + ":" + str(ordered_list_generated[i][j]) + " ")
+        f.write("\n")
+        user_rank_indices[(ordered_list_generated[i])] = float(i)
+    
+    f.close()
+
+    os.system("./svm_rank/svm_rank_learn -c 3 svm_rank/user_queries_train.dat svm_rank/model > /dev/null 2>&1")
+
+    f_read = open("svm_rank/model", "r")
+    last_line = f_read.readlines()[-1]
+    arr = last_line.split(' #')[0].split()
+    arr = arr[1:]
+    new_arr = []
+    ''' Extract each feature from the feature vector '''
+    for el in arr:
+        new_arr.append(float(el.split(':')[1]))
+    f_read.close()
+
+    ordered_list = [x[0] for x in get_rankings(user_rank_indices, user_rank_indices)[1]]
+
+    sum_coef = sum(new_arr)
+    alpha_vector_learned = [x/sum_coef for x in new_arr]
+    alpha_vector_learned.pop()
+
+    return [alpha_vector_learned, ordered_list]
