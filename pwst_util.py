@@ -1,3 +1,6 @@
+"""
+Contains utility functions for intermediate computations in Pareto-Weighted-Sum-Tuning
+"""
 import os
 import random
 import numpy as np
@@ -5,29 +8,6 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-        
-
-#note: for ranking index, a higher index suggests a better ranking
-#uses multi-objective value to rank pairs
-def get_rankings(objective_values, rank_indices):
-    objective_values_list = []
-    for item in objective_values:
-        input = item
-        output = objective_values[item]
-        objective_values_list.append((input, output))
-        
-    objective_values_list.sort(key = lambda x: x[1])  
-    ordered_list = [x for x in objective_values_list]
-
-    for pair in objective_values:
-        rank_index = 0.0
-        for item in objective_values_list:
-            if pair != item[0]:
-                rank_index += 1
-            else:
-                rank_indices[pair] = rank_index
-    
-    return (rank_indices, ordered_list)
                 
 def tuples_to_list(pairs):
     new_list = []
@@ -48,6 +28,9 @@ def average_vectors(vectors):
     return result
 
 def get_data_subset(objective_value_tuples, points_per_iteration):
+    """
+    Samples a subset of a data-set to give to user at one iteration of PWST
+    """
     np.random.seed(101) 
     sample_tuples = []
     sample_tuples_list = []
@@ -59,8 +42,9 @@ def get_data_subset(objective_value_tuples, points_per_iteration):
     return [objective_value_lists, sample_tuples, sample_tuples_list]
 
 def user_feedback(sample_pairs, user_virtual, iteration_number):
-    user_rank_indices = {}
-
+    """
+    Uses Ranking-SVM to return criteria weights at one iteration
+    """
     for example in sample_pairs:
         user_virtual.user_decision(example)
 
@@ -73,7 +57,6 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
         for j in range(len(ordered_list_generated[i])):
             f.write(str(j+1) + ":" + str(ordered_list_generated[i][j]) + " ")
         f.write("\n")
-        user_rank_indices[(ordered_list_generated[i])] = float(i)
     
     f.close()
 
@@ -84,15 +67,14 @@ def user_feedback(sample_pairs, user_virtual, iteration_number):
     arr = last_line.split(' #')[0].split()
     arr = arr[1:]
     new_arr = []
-    ''' Extract each feature from the feature vector '''
+
+    #Extract each feature from the feature vector
     for el in arr:
         new_arr.append(float(el.split(':')[1]))
     f_read.close()
-
-    ordered_list = [x[0] for x in get_rankings(user_rank_indices, user_rank_indices)[1]]
 
     sum_coef = sum(new_arr)
     alpha_vector_learned = [x/sum_coef for x in new_arr]
     alpha_vector_learned.pop()
 
-    return [alpha_vector_learned, ordered_list]
+    return alpha_vector_learned

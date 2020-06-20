@@ -1,21 +1,20 @@
-
+"""
+Class that simulates a sample user/decision-maker
+User has an alpha value that represents criteria weight and tolerance value that represents human variation
+"""
 import numpy as np
-import helper as hp
+import pwst_util as util
 
-"""
-Class that simulates a sample user
-User has an alpha value and tolerance value
-"""
 class Sample_User:
 
-    #Notes: introduce tolerance(noise) and figure out best user_decision data structure
-
+    #initiliazed to default values
     alpha_vector = [0.3, 0.5]
     tolerance_vector = [0.05, 0.05] 
 
-
+    #key: objective value tuple; value: score assigned to objective value tuple
     user_objective_values = {}
-    user_rank_indices = {} #for ranks 0...n, n designates the best rank, 
+
+    #for ranks 0...n, n designates the best rank
     ordered_list = []
 
     def __init__(self, alpha_vector, tolerance_vector):
@@ -36,20 +35,31 @@ class Sample_User:
         del self.ordered_list[:]
     
     def get_user_objective_values(self):
+        """
+        Returns user's criteria weights
+        """
         return self.user_objective_values
     
-    def get_user_rank_indices(self):
-        results = hp.get_rankings(self.user_objective_values, self.user_rank_indices)
-        self.user_rank_indices = results[0]
-        return self.user_rank_indices
-
     def get_user_ordered_list(self):
-        results = hp.get_rankings(self.user_objective_values, self.user_rank_indices)
-        self.ordered_list = [x[0] for x in results[1]]
+        """
+        Returns objective tuples in ranked order
+        """
+        objective_values_list = []
+
+        for item in self.user_objective_values:
+            input = item
+            output = self.user_objective_values[item]
+            objective_values_list.append((input, output))
+            
+        objective_values_list.sort(key = lambda x: x[1])  
+        ordered_list = [x for x in objective_values_list]
+        self.ordered_list = [x[0] for x in ordered_list]
         return self.ordered_list
 
     def user_decision(self, objective_value_tuple):
-        
+        """
+        Uses criteria weights to simulate decision
+        """
         np.random.seed(101) 
         trial_alpha_vector = list(self.alpha_vector)
         for i in range(len(self.alpha_vector)):

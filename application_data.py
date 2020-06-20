@@ -16,7 +16,6 @@ def binomial_model(N, S0, u, r, K):
     K = strike price
     """
     d = 1 / u
-    p = (1 + r - d) / (u - d)
 
     # make stock price tree
     stock = np.zeros([N + 1, N + 1])
