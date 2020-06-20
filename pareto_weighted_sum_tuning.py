@@ -5,7 +5,8 @@ import pwst_util as util
 from sample_user_rank import Sample_User
 import application_data
 
-plot_lines = []
+alpha_plot_lines = []
+error_plot_lines = []
 
 def pareto_weighted_sum_tuning(objective_value_tuples, alpha_vector, tolerance_vector, margin_from_half, iteration_limit):
     """
@@ -28,10 +29,6 @@ def pareto_weighted_sum_tuning(objective_value_tuples, alpha_vector, tolerance_v
     while iteration_number < iteration_limit and len(objective_value_tuples) != 0:
         iteration_number += 1
         alpha_vector_learned = util.user_feedback(sample_tuples, user_virtual, iteration_number)
-
-        for i in range(len(alpha_vector_learned)):
-            print("Iteration alpha " + str(i) + " learned: " + str(alpha_vector_learned[i]))
-
         objective_value_pairs = [x for x in objective_value_tuples if x not in sample_tuples]
         data_subset = util.get_data_subset(objective_value_pairs, margin_from_half)
         sample_tuples = data_subset[1]
@@ -50,8 +47,9 @@ def pareto_weighted_sum_tuning(objective_value_tuples, alpha_vector, tolerance_v
         del user_1
         user_virtual.clear_user_history()
     
-    alpha_0_relative_errors = [x*100 for x in alpha_0_relative_errors]
-    plot_lines.append(alpha_0_relative_errors)
+    alpha_plot_lines.append(mean_alpha_vectors)
 
-    print("mean_alpha_vectors[-1]: " + str(mean_alpha_vectors[-1]))
+    alpha_0_relative_errors = [x*100 for x in alpha_0_relative_errors]
+    error_plot_lines.append(alpha_0_relative_errors)
+
     return mean_alpha_vectors[-1]

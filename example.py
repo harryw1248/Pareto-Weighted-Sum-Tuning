@@ -20,20 +20,37 @@ def main():
         
     for setting in points_per_iteration:
         pwst.pareto_weighted_sum_tuning(objective_value_tuples, alpha_vector, tolerance_vector, setting, iteration_limit)
+    
+    title = "Alpha Progress"
+    plt.title(title)
+    plt.xlabel("Iteration Number") 
+    plt.ylabel("Alpha Value")
+
+    for i in range(len(points_per_iteration)):
+        alpha_plot_name = str(points_per_iteration[i]) + " point sampling"
+        plt.plot([i for i in range(iteration_limit)], pwst.alpha_plot_lines[i], label=alpha_plot_name)
+
+    plt.legend()
+    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     title = "Alpha Relative Error Progress"
     plt.title(title)
     plt.xlabel("Iteration Number") 
     plt.ylabel("Alpha Error Percentage")
 
-
     for i in range(len(points_per_iteration)):
         relative_error_plot_name = str(points_per_iteration[i]) + " point sampling"
-        plt.plot([i for i in range(iteration_limit)], pwst.plot_lines[i], label=relative_error_plot_name)
+        plt.plot([i for i in range(iteration_limit)], pwst.error_plot_lines[i], label=relative_error_plot_name)
 
     plt.legend()
     plt.show()
-    return pwst.plot_lines
+    plt.clf()
+    plt.cla()
+    plt.close()
+    #return pwst.error_plot_lines
 
 if __name__ == "__main__":
     main()
